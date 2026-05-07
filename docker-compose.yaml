@@ -86,6 +86,12 @@ services:
 
     volumes:
       - n8n-data:/home/node/.n8n
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 90s
     deploy:
       resources:
         limits:
