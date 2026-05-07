@@ -86,12 +86,6 @@ services:
 
     volumes:
       - n8n-data:/home/node/.n8n
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5678/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
     deploy:
       resources:
         limits:
