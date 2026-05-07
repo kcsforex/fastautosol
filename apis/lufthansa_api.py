@@ -61,7 +61,7 @@ def flights_resource(rows: list[dict]):
     for r in rows:
         yield r
 
-@router.get("/lh_flights/{flight_date}")
+@router.get("/flights/{flight_date}")
 async def get_flightroute_details(flight_date: str):
 
     token = get_lufthansa_token()
