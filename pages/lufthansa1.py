@@ -5,7 +5,7 @@ from dash import html, dcc, Input, Output, State, callback
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
-from apis.lufthansa_api import sql_engine 
+from sqlalchemy import create_engine
 
 dash.register_page(__name__, icon="fa-plane", name="Lufthansa Flight", order=6)
 
