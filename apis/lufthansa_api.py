@@ -7,7 +7,6 @@ import requests
 from fastapi.responses import StreamingResponse, FileResponse
 import io
 from fastapi import APIRouter
-from sqlalchemy import create_engine
 import dlt
 from dlt.pipeline.exceptions import PipelineStepFailed
 from datetime import datetime
