@@ -108,6 +108,12 @@ async def get_flightroute_details(flight_date: str):
     clean_data.append(filtered)
     
     # --------------------------------------------------------------------------------------------------
+    try:
+        pipeline.drop_pending_packages()
+        pipeline.drop()
+    except Exception as e:
+        print(f"Drop skipped: {e}")
+    
     pipeline = dlt.pipeline(
         pipeline_name="lufthansa", 
         destination=dlt.destinations.postgres(credentials=DB_CONFIG), 
