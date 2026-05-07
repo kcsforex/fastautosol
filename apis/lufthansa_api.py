@@ -15,7 +15,6 @@ from datetime import datetime
 router = APIRouter()
 
 # ----- CONFIGURATION -----
-#sql_engine = create_engine(DB_CONFIG, pool_size=0, max_overflow=0, pool_pre_ping=True)
 DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": "sql_admin", "password": "sql_pass", "connect_timeout": 15}
 
 def get_lufthansa_token():
