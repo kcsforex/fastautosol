@@ -59,7 +59,7 @@ SIDEBAR_STYLE = {
 }
 
 sidebar = html.Div([
-    html.H5("PETROSOFT(EU) CLOUD", className="text-center mb-4", style={"letterSpacing": "2px", "color": "ivory"}),
+    html.H5("FASTAUTOSOL CLOUD", className="text-center mb-4", style={"letterSpacing": "2px", "color": "ivory"}),
     
     html.Div([
         html.Div([
