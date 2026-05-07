@@ -109,17 +109,9 @@ async def get_flightroute_details(flight_date: str):
         dataset_name="lufthansa")
 
     try:
-        load_info = pipeline.run(flights_resource(data), write_disposition="append")
-
-    except PipelineStepFailed as e:
-        msg = str(e).lower()
-        if "does not exist" in msg and "relation" in msg:
-            load_info = pipeline.run(flights_resource(data), write_disposition="replace")
-        else:
-            raise
-    
+        load_info = pipeline.run(flights_resource(data), write_disposition="merge", primary_key=["name", "address"])
     except Exception as e:
-        print(f"Unexpected error: {e}") # network,codebug
+        print(f"Pipeline failed: {e}")
         raise
 
     return {"rows": len(data), "status": "loaded", "load_info": str(load_info), "sample": data[:3]}
