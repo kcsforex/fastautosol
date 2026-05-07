@@ -1,4 +1,4 @@
-# 2026.04.27  19.00
+# 2026.05.07  18.00
 import os
 import httpx
 import asyncio
@@ -123,6 +123,3 @@ async def get_flightroute_details(flight_date: str):
         raise
 
     return {"rows": len(data), "status": "loaded", "load_info": str(load_info), "sample": data[:3]}
-
-    #load_info = pipeline.run([ dlt.resource(flights_resource(data), name="flights") ])
-    #load_info = pipeline.run(flights_resource(data), table_name="flights")
