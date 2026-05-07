@@ -108,7 +108,8 @@ async def get_flightroute_details(flight_date: str):
         dataset_name="lufthansa")
 
     try:
-        load_info = pipeline.run(flights_resource(data), write_disposition="merge", primary_key=["name", "address"])
+        load_info = pipeline.run(flights_resource(data), write_disposition="merge", 
+                                 primary_key=["route_key", "departure__scheduled__date", "departure__scheduled__time"])
     except Exception as e:
         print(f"Pipeline failed: {e}")
         raise
