@@ -99,15 +99,22 @@ async def get_flightroute_details(flight_date: str):
 
     for row in data:
         row["_ingested_at"] = datetime.utcnow().isoformat()
+    # --------------------------------------------------------------------------------------------------
 
-    # ------------------------------------------------------------------------------
+    ALLOWED_FIELDS = {"Departure", "Arrival", "AircraftDetails", "route_key",  "_ingested_at"}
+    clean_data = []    
+    for row in data:
+        filtered = {k: v for k, v in row.items() if k in ALLOWED_FIELDS}
+    clean_data.append(filtered)
+    
+    # --------------------------------------------------------------------------------------------------
     pipeline = dlt.pipeline(
         pipeline_name="lufthansa", 
         destination=dlt.destinations.postgres(credentials=DB_CONFIG), 
         dataset_name="lufthansa")
 
     try:
-        load_info = pipeline.run(flights_resource(data), write_disposition="merge", 
+        load_info = pipeline.run(flights_resource(clean_data), write_disposition="merge", 
                                  primary_key=["route_key", "departure__scheduled__date", "departure__scheduled__time"])
     except Exception as e:
         print(f"Pipeline failed: {e}")
