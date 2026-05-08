@@ -1,9 +1,10 @@
-# 2026.05.04 18.00
+# 2026.05.08 18.00
 from fastapi import APIRouter
 import requests
 import dlt
 from datetime import datetime
 from pydantic import BaseModel
+import os
 
 class SerperRequest(BaseModel):
     city: str
