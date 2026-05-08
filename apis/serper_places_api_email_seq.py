@@ -2,6 +2,7 @@
 from fastapi import APIRouter
 import requests
 import re
+import os
 import dlt
 from datetime import datetime
 from pydantic import BaseModel
@@ -11,7 +12,7 @@ class SerperRequest(BaseModel):
     city: str
     limit: int = 10
 
-API_KEY = 'dcd6fcff2572937d4c34e5d5ef0bd0b94ed68138'
+SERPER_KEY = os.getenv("SERPER_API_KEY")
 DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": "sql_admin", "password": "sql_pass", "connect_timeout": 15}
 
 router = APIRouter()
@@ -37,7 +38,7 @@ def search_email_via_serper(company_name: str, address: str) -> list[str]:
     try:
         url = "https://google.serper.dev/search"
         payload = {"q": f"{company_name} {address} email contact"}
-        resp = requests.post(url, headers={'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}, json=payload)
+        resp = requests.post(url, headers={'X-API-KEY': SERPER_KEY, 'Content-Type': 'application/json'}, json=payload)
         resp.raise_for_status()
         emails = re.findall(EMAIL_REGEX, json.dumps(resp.json()))
         return list(set(emails))
@@ -58,7 +59,7 @@ def fetch_serper(city: str, limit: int):
 
     variations = [
         "shipping", "transport", "logistics", "freight forwarding", "warehouse", "shopping", "delivery", "factory", "producing", "transportation",
-        "apartment", "hotel", "guesthouse", "car service", "company", "business", "office", "IT company"]
+        "apartment", "hotel", "guesthouse", "car service", "company", "business", "office", "IT company", "restaurant"]
 
     results_map = {}
 
@@ -67,7 +68,7 @@ def fetch_serper(city: str, limit: int):
             break
 
         payload = {"q": f"{v} in {city}", "gl": "hu", "hl": "hu"}
-        resp = requests.post(url, headers={'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}, json=payload)
+        resp = requests.post(url, headers={'X-API-KEY': SERPER_KEY, 'Content-Type': 'application/json'}, json=payload)
         resp.raise_for_status()
         places = resp.json().get("places", [])
 
