@@ -27,7 +27,7 @@ EMAIL_REGEX = r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}"
 
 def scrape_emails_from_url(url: str) -> list[str]:
     try:
-        resp = requests.get(url, timeout=5, headers={"User-Agent": "Mozilla/5.0"})
+        resp = requests.get(url, timeout=7, headers={"User-Agent": "Mozilla/5.0"})
         soup = BeautifulSoup(resp.text, "html.parser")
         emails = re.findall(EMAIL_REGEX, soup.get_text())
         return list(set(emails))
