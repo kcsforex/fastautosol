@@ -105,7 +105,7 @@ async def get_flightroute_details(flight_date: str):
     clean_data = []    
     for row in data:
         filtered = {k: v for k, v in row.items() if k in ALLOWED_FIELDS}
-    clean_data.append(filtered)
+        clean_data.append(filtered)
     
     # --------------------------------------------------------------------------------------------------
     #  pipeline.drop_pending_packages() pipeline.drop()
