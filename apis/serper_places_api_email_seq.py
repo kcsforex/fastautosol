@@ -13,7 +13,7 @@ class SerperRequest(BaseModel):
     limit: int = 10
 
 SERPER_KEY = os.getenv("SERPER_API_KEY")
-DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": "sql_admin", "password": "sql_pass", "connect_timeout": 15}
+DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": "sql_admin", "password": "sql_pass", "connect_timeout": 35}
 
 router = APIRouter()
 
