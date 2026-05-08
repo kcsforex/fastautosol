@@ -9,7 +9,7 @@ class SerperRequest(BaseModel):
     city: str
     limit: int = 10
 
-API_KEY = 'dcd6fcff2572937d4c34e5d5ef0bd0b94ed68138'
+SERPER_KEY = os.getenv("SERPER_API_KEY")
 DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": "sql_admin", "password": "sql_pass", "connect_timeout": 15}
 
 router = APIRouter()
@@ -34,7 +34,7 @@ def fetch_serper(city: str, limit: int):
             break
 
         payload = { "q": f"{v} in {city}", "gl": "hu", "hl": "hu" }
-        resp = requests.post(url, headers={'X-API-KEY': API_KEY,'Content-Type': 'application/json'}, json=payload)
+        resp = requests.post(url, headers={'X-API-KEY': SERPER_KEY,'Content-Type': 'application/json'}, json=payload)
         resp.raise_for_status()
         places = resp.json().get("places", [])
 
