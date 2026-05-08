@@ -18,7 +18,7 @@ DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": 
 router = APIRouter()
 
 # --- dlt resource ---
-@dlt.resource(name="companies_email", max_table_nesting=0)
+@dlt.resource(name="companies_email_seq", max_table_nesting=0)
 def companies_resource(data):
     yield from data
 
