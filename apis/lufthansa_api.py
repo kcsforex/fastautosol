@@ -1,4 +1,4 @@
-# 2026.05.08  9.00
+# 2026.05.08  17.00
 import os
 import httpx
 import asyncio
@@ -101,7 +101,7 @@ async def get_flightroute_details(flight_date: str):
         row["_ingested_at"] = datetime.utcnow().isoformat()
     # --------------------------------------------------------------------------------------------------
 
-    ALLOWED_FIELDS = {"Departure", "Arrival", "AircraftDetails", "route_key",  "_ingested_at"}
+    ALLOWED_FIELDS = {"Status", "Departure", "Arrival", "AircraftDetails", "route_key",  "_ingested_at"}
     clean_data = []    
     for row in data:
         filtered = {k: v for k, v in row.items() if k in ALLOWED_FIELDS}
