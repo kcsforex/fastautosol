@@ -26,7 +26,7 @@ def fetch_serper(city: str, limit: int):
 
     variations = [
         "shipping", "transport", "logistics", "freight forwarding", "warehouse", "shopping", "delivery", "factory", "producing", "transportation",
-         "apartment", "hotel", "guesthouse", "car service",   "company", "business", "office", "IT company"]
+         "apartment", "hotel", "guesthouse", "car service",  "company", "business", "office", "IT company", "restaurant"]
 
     results_map = {}
 
