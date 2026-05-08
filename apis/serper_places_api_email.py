@@ -1,8 +1,9 @@
-# 2026.05.06  18.00
+# 2026.05.08  18.00
 from fastapi import APIRouter
 import asyncio
 import aiohttp
 import re
+import os
 import json
 import dlt
 from datetime import datetime
@@ -13,7 +14,7 @@ class SerperRequest(BaseModel):
     city: str
     limit: int = 10
 
-API_KEY = 'dcd6fcff2572937d4c34e5d5ef0bd0b94ed68138'
+SERPER_KEY = os.getenv("SERPER_API_KEY")
 DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": "sql_admin", "password": "sql_pass", "connect_timeout": 15}
 
 router = APIRouter()
@@ -90,7 +91,7 @@ async def fetch_serper_async(city: str, limit: int):
                 break
 
             payload = {"q": f"{v} in {city}", "gl": "hu", "hl": "hu"}
-            async with session.post(url, headers={'X-API-KEY': API_KEY, 'Content-Type': 'application/json'}, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+            async with session.post(url, headers={'X-API-KEY': SERPER_KEY, 'Content-Type': 'application/json'}, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                 resp.raise_for_status()
                 places = (await resp.json()).get("places", [])
 
