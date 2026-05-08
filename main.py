@@ -1,4 +1,4 @@
-# 2026.05.06  18.00
+# 2026.05.08  18.00
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -13,6 +13,7 @@ import apis.kraken_api as kraken
 import apis.lufthansa_api as lufthansa
 import apis.serper_places_api as serper_places
 import apis.serper_places_api_email as serper_places_email
+import apis.serper_places_api_email_seq as serper_places_email_seq
 import apis.movies_api_dlt as movies_dlt
 import apis.youtube_api as youtube
 import apis.youtube_api_dlt as youtube_dlt
@@ -35,6 +36,7 @@ server.include_router(kraken.router,        prefix="/api/kraken",        tags=["
 server.include_router(lufthansa.router,     prefix="/api/lufthansa",     tags=["Lufthansa"])
 server.include_router(serper_places.router, prefix="/api/serper",        tags=["Serper Places"])
 server.include_router(serper_places_email.router, prefix="/api/serper_email",        tags=["Serper Places Email"])
+server.include_router(serper_places_email_seq.router, prefix="/api/serper_email_seq",        tags=["Serper Places Email Seq"])
 server.include_router(movies_dlt.router,    prefix="/api/movies_dlt",    tags=["Movies DLT"])
 server.include_router(youtube.router,       prefix="/api/youtube",       tags=["Youtube Single/Multi Channel"])
 server.include_router(youtube_dlt.router,   prefix="/api/youtube_dlt",   tags=["Youtube Single/Multi Channel DLT"])
