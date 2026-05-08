@@ -43,7 +43,7 @@ async def search_email_via_serper(session: aiohttp.ClientSession, company_name: 
         payload = {"q": f"{company_name} {address} email contact"}
         async with session.post(
             "https://google.serper.dev/search",
-            headers={'X-API-KEY': API_KEY, 'Content-Type': 'application/json'},
+            headers={'X-API-KEY': SERPER_KEY, 'Content-Type': 'application/json'},
             json=payload,
             timeout=aiohttp.ClientTimeout(total=8)
         ) as resp:
@@ -78,7 +78,7 @@ async def fetch_serper_async(city: str, limit: int):
     variations = [
         "shipping", "transport", "logistics", "freight forwarding", "warehouse",
         "shopping", "delivery", "factory", "producing", "transportation",
-        "apartment", "hotel", "guesthouse", "car service",
+        "apartment", "hotel", "guesthouse", "car service", "restaurant", 
         "company", "business", "office", "IT company"
     ]
 
