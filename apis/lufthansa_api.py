@@ -121,6 +121,7 @@ async def get_flightroute_details(flight_date: str):
 
     except PipelineStepFailed as e:    
         if e.step == "load" or "does not exist" in str(e).lower():
+            pipeline.drop_pending_packages()
             load_info = pipeline.run(flights_resource(clean_data), write_disposition="append")
         else:
             raise
