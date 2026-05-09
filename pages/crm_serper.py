@@ -13,7 +13,7 @@ DB_CONFIG = "postgresql+psycopg://sql_admin:sql_pass@postgresql:5432/n8n"
 sql_engine = create_engine(DB_CONFIG, pool_size=5, max_overflow=10, pool_pre_ping=True, pool_recycle=1800,      
     connect_args={'connect_timeout': 5, 'keepalives': 1, 'keepalives_idle': 30, 'keepalives_interval': 10, 'keepalives_count': 5})
 
-dash.register_page(__name__, icon="fa-plane", name="Lufthansa Flight", order=6)
+dash.register_page(__name__, icon="fa-plane", name="CRM Serper", order=6)
 
 # ---- Glass Card ----
 CARD_STYLE = {
@@ -26,26 +26,27 @@ CARD_STYLE = {
 # -------------------
 # LAYOUT
 # -------------------
+DASH_ID_TAG = 'serper'
+
 layout = dbc.Container([
 
     html.Div([
-        html.H2("Lufthansa Dashboard", className="text-light fw-bold mb-0"),
-        html.P(id='lh-metrics-update', className="text-muted small"),
+        html.H2("CRM Serper (Google) Dashboard", className="text-light fw-bold mb-0"),
     ], className="mb-3"),
 
     dcc.Interval(id='refresh', interval=60000),
-    dcc.Store(id="lh-df-store"),
+    dcc.Store(id=f"{DASH_ID_TAG}-df-store"),
 
     # ---- 6 MINI CHART GRID (LIKE BYBIT) ----
-    dbc.Row(id="lh-mini-charts", className="g-3 mb-4"),
+    dbc.Row(id=f"{DASH_ID_TAG}-mini-charts", className="g-3 mb-4"),
 
     # ---- 3 SMALL KPI TABLE ----
-    dbc.Row(id="lh-mini-tables", className="g-3 mb-4"),
+    dbc.Row(id=f"{DASH_ID_TAG}-mini-tables", className="g-3 mb-4"),
 
     # ---- LOG TABLE ----
     html.Div([
         html.H5("Lufthansa Logs", className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
-        html.Div(id='lh-log-table',
+        html.Div(id=f"{DASH_ID_TAG}-log-table",
             style={"height": "300px", "overflowY": "auto", "fontSize": "12px"})
     ], style=CARD_STYLE)
 
@@ -55,12 +56,11 @@ layout = dbc.Container([
 # -------------------
 # DATA CALLBACK
 # -------------------
-@callback(
-    Output('lh-metrics-update', 'children'),    
-    Output('lh-df-store', 'data'),
-    Output('lh-mini-charts', 'children'),
-    Output('lh-mini-tables', 'children'),
-    Output('lh-log-table', 'children'),
+@callback( 
+    Output(f"{DASH_ID_TAG}-df-store", 'data'),
+    Output(f"{DASH_ID_TAG}-mini-charts", 'children'),
+    Output(f"{DASH_ID_TAG}-mini-tables", 'children'),
+    Output(f"{DASH_ID_TAG}-log-table", 'children'),
     Input('refresh', 'n_intervals'),
 )
 def load_data_render(_):
