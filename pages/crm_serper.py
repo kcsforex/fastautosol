@@ -95,7 +95,8 @@ def load_data_render(_):
         return dbc.Col([
             html.Div([
                 html.H6(title, className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
-                dcc.Graph(figure=content, config={"displayModeBar": False}, style={"height": "220px"}) if is_graph else content
+                dcc.Graph(figure=content, config={"displayModeBar": False}, style={"height": "220px"}) 
+                if is_graph else html.Div(content, style={"height": "200px", "overflowY": "auto"})
             ], style=CARD_STYLE)
         ], md=md_col)
 
