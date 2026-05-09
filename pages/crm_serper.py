@@ -1,4 +1,4 @@
-# 2026.05.09  9.00
+# 2026.05.09  10.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -66,10 +66,11 @@ layout = dbc.Container([
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-        df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)
+        df_c = pd.read_sql("SELECT * FROM serper.companies", conn)
+        df_ce = pd.read_sql("SELECT * FROM serper.companies_email", conn)
 
     if df.empty:
-        return "No data", None, [], [], None
+        return None, [], [], None
 
     # ---- parse dates (combine date + time columns) ----
     df["dep_sched_dt"] = pd.to_datetime(df["departure__scheduled__date"] + " " + df["departure__scheduled__time"], errors="coerce")
@@ -153,4 +154,4 @@ def load_data_render(_):
     table = dbc.Table.from_dataframe(df.iloc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
         className="text-light m-0", style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
-    return f"Updated → {df['_ingested_at'].iloc[-1]}", df.to_dict("records"), mini_charts, mini_tables, table
+    return df.to_dict("records"), mini_charts, mini_tables, table
