@@ -16,12 +16,8 @@ sql_engine = create_engine(DB_CONFIG, pool_size=5, max_overflow=10, pool_pre_pin
 dash.register_page(__name__, icon="fa-plane", name="CRM Serper", order=6)
 
 # ---- Glass Card ----
-CARD_STYLE = {
-    "background": "rgba(255, 255, 255, 0.03)",
-    "backdrop-filter": "blur(10px)",
-    "border-radius": "15px", "border": "1px solid rgba(255, 255, 255, 0.1)",
-    "padding": "15px", "width": "100%"
-}
+CARD_STYLE = { "background": "rgba(255, 255, 255, 0.03)", "backdrop-filter": "blur(10px)",
+    "border-radius": "15px", "border": "1px solid rgba(255, 255, 255, 0.1)", "padding": "15px", "width": "100%"}
 
 # -------------------
 # LAYOUT
@@ -46,8 +42,7 @@ layout = dbc.Container([
     # ---- LOG TABLE ----
     html.Div([
         html.H5("CRM Serper Logs", className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
-        html.Div(id=f"{DASH_ID_TAG}-log-table",
-            style={"height": "300px", "overflowY": "auto", "fontSize": "12px"})
+        html.Div(id=f"{DASH_ID_TAG}-log-table", style={"height": "300px", "overflowY": "auto", "fontSize": "12px"})
     ], style=CARD_STYLE)
 
 ], fluid=True)
@@ -96,7 +91,6 @@ def load_data_render(_):
     # -------------------
 
     mini_charts = []
-
     def make_card(title, content, is_graph=True):
 
         if is_graph:
@@ -138,7 +132,6 @@ def load_data_render(_):
     # -------------------
     # MINI TABLES
     # -------------------
-
     def make_table(df_table):
 
         return dbc.Table.from_dataframe(df_table, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
@@ -156,28 +149,8 @@ def load_data_render(_):
     # LOG TABLE
     # -------------------
     log_cols = ["name", "city", "category", "rating", "reviews", "email", "phone_number", "website", "_ingested_at"]
+    log_df = df[log_cols].sort_values("_ingested_at", ascending=False).head(100)    
+    table = dbc.Table.from_dataframe(log_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
+        style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white", "fontSize": "11px"})
 
-    log_df = df[log_cols].sort_values("_ingested_at", ascending=False).head(100)
-    
-    table = dbc.Table.from_dataframe(
-        log_df,
-        striped=False,
-        hover=True,
-        responsive=True,
-        borderless=True,
-        className="text-light small",
-        style={
-            "backgroundColor": "transparent",
-            "--bs-table-bg": "transparent",
-            "--bs-table-accent-bg": "transparent",
-            "color": "white",
-            "fontSize": "11px"
-        }
-    )
-
-    return (
-        df.to_dict("records"),
-        mini_charts,
-        mini_tables,
-        table
-    )
+    return (df.to_dict("records"), mini_charts, mini_tables, table)
