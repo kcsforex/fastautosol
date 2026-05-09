@@ -132,98 +132,33 @@ def load_data_render(_):
     mini_charts.append(make_card("Email Coverage", px.pie(email_stats, names="type", values="count", hole=0.4)))
 
     # 6 Avg Rating by Category
-    avg_rating = (
-        df.groupby("category")["rating"]
-        .mean()
-        .dropna()
-        .sort_values(ascending=False)
-        .head(15)
-        .reset_index()
-    )
-
-    mini_charts.append(
-        make_card(
-            "Avg Rating by Category",
-            px.bar(
-                avg_rating,
-                x="category",
-                y="rating",
-                template="plotly_dark"
-            )
-        )
-    )
-
+    avg_rating = df.groupby("category")["rating"].mean().dropna().sort_values(ascending=False).head(15).reset_index() 
+    mini_charts.append(make_card("Avg Rating by Category", px.bar(avg_rating, x="category", y="rating", template="plotly_dark")))
+ 
     # -------------------
     # MINI TABLES
     # -------------------
 
     def make_table(df_table):
 
-        return dbc.Table.from_dataframe(
-            df_table,
-            striped=False,
-            hover=True,
-            responsive=True,
-            borderless=True,
-            className="text-light small",
-            style={
-                "backgroundColor": "transparent",
-                "--bs-table-bg": "transparent",
-                "--bs-table-accent-bg": "transparent",
-                "color": "white"
-            }
-        )
+        return dbc.Table.from_dataframe(df_table, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
+            style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
-    top_rated = (
-        df[["name", "city", "rating", "reviews"]]
-        .dropna(subset=["rating"])
-        .sort_values(["rating", "reviews"], ascending=False)
-        .head(10)
-    )
-
-    most_reviews = (
-        df[["name", "city", "reviews"]]
-        .dropna(subset=["reviews"])
-        .sort_values("reviews", ascending=False)
-        .head(10)
-    )
-
-    missing_contacts = (
-        df[
-            df["email"].isna() &
-            df["phone_number"].isna()
-        ][["name", "city", "category"]]
-        .head(10)
-    )
-
+    top_rated = df[["name", "city", "rating", "reviews"]].dropna(subset=["rating"]).sort_values(["rating", "reviews"], ascending=False).head(10)
+    most_reviews = df[["name", "city", "reviews"]].dropna(subset=["reviews"]).sort_values("reviews", ascending=False).head(10)
+    
     mini_tables = [
         make_card("Top Rated", make_table(top_rated), is_graph=False),
         make_card("Most Reviews", make_table(most_reviews), is_graph=False),
-        make_card("Missing Contacts", make_table(missing_contacts), is_graph=False),
     ]
 
     # -------------------
     # LOG TABLE
     # -------------------
+    log_cols = ["name", "city", "category", "rating", "reviews", "email", "phone_number", "website", "_ingested_at"]
 
-    log_cols = [
-        "name",
-        "city",
-        "category",
-        "rating",
-        "reviews",
-        "email",
-        "phone_number",
-        "website",
-        "_ingested_at"
-    ]
-
-    log_df = (
-        df[log_cols]
-        .sort_values("_ingested_at", ascending=False)
-        .head(100)
-    )
-
+    log_df = df[log_cols].sort_values("_ingested_at", ascending=False).head(100)
+    
     table = dbc.Table.from_dataframe(
         log_df,
         striped=False,
