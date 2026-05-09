@@ -89,17 +89,15 @@ def load_data_render(_):
     # MINI CHARTS
     # -------------------
     mini_charts = []
-    def make_card(title, content, is_graph=True):
-
+    def make_card(title, content, is_graph=True, md_col=4):
         if is_graph:
             content.update_layout(height=220, margin=dict(l=10, r=10, t=25, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
-
         return dbc.Col([
             html.Div([
                 html.H6(title, className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
                 dcc.Graph(figure=content, config={"displayModeBar": False}, style={"height": "220px"}) if is_graph else content
             ], style=CARD_STYLE)
-        ], md=4)
+        ], md=md_col)
 
     # 1 Top Categories
     cat_df = df["category"].value_counts().head(15).reset_index()
@@ -139,8 +137,8 @@ def load_data_render(_):
     most_reviews = df[["name", "city", "reviews"]].dropna(subset=["reviews"]).sort_values("reviews", ascending=False).head(10)
     
     mini_tables = [
-        make_card("Top Rated", make_table(top_rated), is_graph=False),
-        make_card("Most Reviews", make_table(most_reviews), is_graph=False),
+        make_card("Top Rated", make_table(top_rated), is_graph=False, md_col=6),
+        make_card("Most Reviews", make_table(most_reviews), is_graph=False, md_col=6),
     ]
 
     # -------------------
