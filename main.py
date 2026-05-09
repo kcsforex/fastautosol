@@ -1,4 +1,4 @@
-# 2026.05.08  18.00
+# 2026.05.09  10.00
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -22,7 +22,7 @@ app = dash.Dash(__name__, use_pages=True, suppress_callback_exceptions=True, # c
     external_stylesheets=[dbc.themes.DARKLY, "https://use.fontawesome.com/releases/v5.15.4/css/all.css"])
 
 # ----- 2. NOW IMPORT YOUR PAGES -----
-from pages import home, bybit_ccharts, bybit_lcharts, crm_rag, crm_rag_mcp, mexc_charts, mcp, lufthansa1, lufthansa2
+from pages import home, bybit_ccharts, bybit_lcharts, crm_serper, crm_rag, crm_rag_mcp, mexc_charts, mcp, lufthansa1, lufthansa2
 
 # ----- 3. FASTAPI WRAPPER -----
 server = FastAPI(title="Dash Main App", lifespan=lambda app: youtube.mcp.session_manager.run())
