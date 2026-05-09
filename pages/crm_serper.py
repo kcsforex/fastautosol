@@ -56,104 +56,307 @@ layout = dbc.Container([
 # -------------------
 # DATA CALLBACK
 # -------------------
-@callback( 
-    Output(f"{DASH_ID_TAG}-df-store", 'data'),
-    Output(f"{DASH_ID_TAG}-mini-charts", 'children'),
-    Output(f"{DASH_ID_TAG}-mini-tables", 'children'),
-    Output(f"{DASH_ID_TAG}-log-table", 'children'),
-    Input('refresh', 'n_intervals'),
+@callback(
+    Output(f"{DASH_ID_TAG}-df-store", "data"),
+    Output(f"{DASH_ID_TAG}-mini-charts", "children"),
+    Output(f"{DASH_ID_TAG}-mini-tables", "children"),
+    Output(f"{DASH_ID_TAG}-log-table", "children"),
+    Input("refresh", "n_intervals"),
 )
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-        df_c = pd.read_sql("SELECT * FROM serper.companies", conn)
-        df_ce = pd.read_sql("SELECT * FROM serper.companies_email", conn)
+        df = pd.read_sql("SELECT * FROM serper.companies_email", conn)
 
-    if df_c.empty:
-        return None, [], [], None
-    if df_ce.empty:
+    if df.empty:
         return None, [], [], None
 
-    # ---- parse dates (combine date + time columns) ----
-    df["dep_sched_dt"] = pd.to_datetime(df["departure__scheduled__date"] + " " + df["departure__scheduled__time"], errors="coerce")
-    df["dep_actual_dt"] = pd.to_datetime(df["departure__actual__date"] + " " + df["departure__actual__time"], errors="coerce")
-    df["arr_sched_dt"] = pd.to_datetime(df["arrival__scheduled__date"] + " " + df["arrival__scheduled__time"], errors="coerce")
-    df["arr_actual_dt"] = pd.to_datetime(df["arrival__actual__date"] + " " + df["arrival__actual__time"], errors="coerce")
-    
-    # ---- delays (safe) ----
-    df["dep_delay_min"] = (df["dep_actual_dt"] - df["dep_sched_dt"]).dt.total_seconds() / 60
-    df["arr_delay_min"] = (df["arr_actual_dt"] - df["arr_sched_dt"]).dt.total_seconds() / 60
-    
-    # ---- hour ----
-    df["dep_hour"] = df["dep_sched_dt"].dt.hour
-    df["_ingested_at"] = pd.to_datetime(df["_ingested_at"]).dt.strftime("%Y-%m-%d %H:%M:%S")
+    # -------------------
+    # CLEAN DATA
+    # -------------------
+    df.columns = [c.lower() for c in df.columns]
+
+    # normalize UNKNOWN
+    df = df.replace("UNKNOWN", pd.NA)
+
+    # parse numeric
+    df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
+    df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce")
+
+    # parse datetime
+    df["_ingested_at"] = pd.to_datetime(df["_ingested_at"], errors="coerce")
+
+    # clean emails
+    df["email"] = (
+        df["email"]
+        .fillna("")
+        .astype(str)
+        .str.replace(" ", "", regex=False)
+    )
+
+    # email count
+    df["email_count"] = df["email"].apply(
+        lambda x: len([e for e in x.split(",") if e.strip()])
+    )
+
+    # website domain
+    df["has_website"] = df["website"].notna()
+
+    # phone exists
+    df["has_phone"] = df["phone_number"].notna()
+
+    # deduplicate by cid
+    df = (
+        df.sort_values("_ingested_at")
+        .drop_duplicates(subset=["cid"], keep="last")
+    )
 
     # -------------------
-    # 6 MINI CHARTS
+    # MINI CHARTS
     # -------------------
+
     mini_charts = []
+
     def make_card(title, content, is_graph=True):
+
         if is_graph:
-            content.update_layout(height=200, margin=dict(l=10,r=10,t=15,b=15), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
+            content.update_layout(
+                height=220,
+                margin=dict(l=10, r=10, t=25, b=10),
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="white")
+            )
+
         return dbc.Col([
-        html.Div([
-            html.H6(title, className="mb-1", style={"color": "#f59e0b", "fontWeight": "500"}),
-            dcc.Graph(figure=content,config={'displayModeBar': False}, style={"height": "200px"}) 
-            if is_graph else html.Div(content, style={"height": "200px", "overflowY": "auto"})
-        ], style=CARD_STYLE)
-    ], md=4) #className="d-flex"
+            html.Div([
+                html.H6(
+                    title,
+                    className="mb-2",
+                    style={"color": "#f59e0b", "fontWeight": "500"}
+                ),
 
-    # 1 Delay dist
-    df_delay_filtered = df[df["dep_delay_min"].notna() & (df["dep_delay_min"] <= 100)]
-    mini_charts.append(make_card("Departure Delay Dist", px.histogram(df_delay_filtered, x="dep_delay_min", nbins=25, template="plotly_dark")))
+                dcc.Graph(
+                    figure=content,
+                    config={"displayModeBar": False},
+                    style={"height": "220px"}
+                ) if is_graph else content
 
-    # 2 Route delay
-    route = df.groupby("route_key")["dep_delay_min"].mean().reset_index()
-    mini_charts.append(make_card("Top Delay Routes", px.bar(route.sort_values("dep_delay_min", ascending=False).head(15), x="route_key", y="dep_delay_min", template="plotly_dark")))
+            ], style=CARD_STYLE)
+        ], md=4)
 
-    # 3 Airport traffic
-    airport = df["arrival__airport_code"].value_counts().head(15).reset_index()
-    airport.columns = ["airport", "count"]
-    mini_charts.append(make_card("Arrival Airports", px.bar(airport, x="airport", y="count", template="plotly_dark")))
+    # 1 Top Categories
+    cat_df = (
+        df["category"]
+        .value_counts()
+        .head(15)
+        .reset_index()
+    )
 
-    # 4 Status
-    status = df["status__code"].value_counts().reset_index()
-    status.columns = ["status", "count"]
-    mini_charts.append(make_card("Status", px.pie(status, names="status", values="count", hole=0.4)))
+    cat_df.columns = ["category", "count"]
 
-    # 5 Hour delay
-    hour = df.groupby("dep_hour")["dep_delay_min"].mean().reset_index()
-    mini_charts.append(make_card("Delay by Hour", px.line(hour, x="dep_hour", y="dep_delay_min", template="plotly_dark")))
+    mini_charts.append(
+        make_card(
+            "Top Categories",
+            px.bar(
+                cat_df,
+                x="category",
+                y="count",
+                template="plotly_dark"
+            )
+        )
+    )
 
-    # 6 Aircraft
-    aircraft = df["equipment__aircraft_code"].value_counts().reset_index()
-    aircraft.columns = ["aircraft", "count"]
-    mini_charts.append(make_card("Aircraft Usage", px.bar(aircraft.head(10), x="aircraft", y="count", template="plotly_dark")))
+    # 2 Top Cities
+    city_df = (
+        df["city"]
+        .value_counts()
+        .head(15)
+        .reset_index()
+    )
+
+    city_df.columns = ["city", "count"]
+
+    mini_charts.append(
+        make_card(
+            "Top Cities",
+            px.bar(
+                city_df,
+                x="city",
+                y="count",
+                template="plotly_dark"
+            )
+        )
+    )
+
+    # 3 Ratings Distribution
+    rating_df = df[df["rating"].notna()]
+
+    mini_charts.append(
+        make_card(
+            "Ratings Distribution",
+            px.histogram(
+                rating_df,
+                x="rating",
+                nbins=20,
+                template="plotly_dark"
+            )
+        )
+    )
+
+    # 4 Review Leaders
+    review_df = (
+        df[["name", "reviews"]]
+        .dropna()
+        .sort_values("reviews", ascending=False)
+        .head(15)
+    )
+
+    mini_charts.append(
+        make_card(
+            "Most Reviewed",
+            px.bar(
+                review_df,
+                x="name",
+                y="reviews",
+                template="plotly_dark"
+            )
+        )
+    )
+
+    # 5 Email Availability
+    email_stats = pd.DataFrame({
+        "type": ["Has Email", "No Email"],
+        "count": [
+            df["email"].astype(bool).sum(),
+            (~df["email"].astype(bool)).sum()
+        ]
+    })
+
+    mini_charts.append(
+        make_card(
+            "Email Coverage",
+            px.pie(
+                email_stats,
+                names="type",
+                values="count",
+                hole=0.4
+            )
+        )
+    )
+
+    # 6 Avg Rating by Category
+    avg_rating = (
+        df.groupby("category")["rating"]
+        .mean()
+        .dropna()
+        .sort_values(ascending=False)
+        .head(15)
+        .reset_index()
+    )
+
+    mini_charts.append(
+        make_card(
+            "Avg Rating by Category",
+            px.bar(
+                avg_rating,
+                x="category",
+                y="rating",
+                template="plotly_dark"
+            )
+        )
+    )
 
     # -------------------
-    # 3 SMALL TABLE
+    # MINI TABLES
     # -------------------
-    dep_tbl = (df.groupby("route_key")["dep_delay_min"].mean().round(2).sort_values(ascending=False).head(10).reset_index())
-    arr_tbl = (df.groupby("route_key")["arr_delay_min"].mean().round(2).sort_values(ascending=False).head(10).reset_index())   
-    route_cnt = (df["route_key"].value_counts().head(10).reset_index())
-    route_cnt.columns = ["route_key", "count"]
 
     def make_table(df_table):
-        return dbc.Table.from_dataframe(df_table, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
-        style={ "backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
+
+        return dbc.Table.from_dataframe(
+            df_table,
+            striped=False,
+            hover=True,
+            responsive=True,
+            borderless=True,
+            className="text-light small",
+            style={
+                "backgroundColor": "transparent",
+                "--bs-table-bg": "transparent",
+                "--bs-table-accent-bg": "transparent",
+                "color": "white"
+            }
+        )
+
+    top_rated = (
+        df[["name", "city", "rating", "reviews"]]
+        .dropna(subset=["rating"])
+        .sort_values(["rating", "reviews"], ascending=False)
+        .head(10)
+    )
+
+    most_reviews = (
+        df[["name", "city", "reviews"]]
+        .dropna(subset=["reviews"])
+        .sort_values("reviews", ascending=False)
+        .head(10)
+    )
+
+    missing_contacts = (
+        df[
+            df["email"].isna() &
+            df["phone_number"].isna()
+        ][["name", "city", "category"]]
+        .head(10)
+    )
 
     mini_tables = [
-    make_card("Dep Delay", make_table(dep_tbl), is_graph=False),
-    make_card("Arr Delay", make_table(arr_tbl), is_graph=False),
-    make_card("Route Volume", make_table(route_cnt), is_graph=False)
+        make_card("Top Rated", make_table(top_rated), is_graph=False),
+        make_card("Most Reviews", make_table(most_reviews), is_graph=False),
+        make_card("Missing Contacts", make_table(missing_contacts), is_graph=False),
     ]
 
     # -------------------
     # LOG TABLE
     # -------------------
-    #table = dbc.Table.from_dataframe(df.tail(100), striped=False, borderless=True, className="text-light small")
-    status_cols = [1, 23, 24, 14, 15]
-    table = dbc.Table.from_dataframe(df.iloc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
-        className="text-light m-0", style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
-    return df.to_dict("records"), mini_charts, mini_tables, table
+    log_cols = [
+        "name",
+        "city",
+        "category",
+        "rating",
+        "reviews",
+        "email",
+        "phone_number",
+        "website",
+        "_ingested_at"
+    ]
+
+    log_df = (
+        df[log_cols]
+        .sort_values("_ingested_at", ascending=False)
+        .head(100)
+    )
+
+    table = dbc.Table.from_dataframe(
+        log_df,
+        striped=False,
+        hover=True,
+        responsive=True,
+        borderless=True,
+        className="text-light small",
+        style={
+            "backgroundColor": "transparent",
+            "--bs-table-bg": "transparent",
+            "--bs-table-accent-bg": "transparent",
+            "color": "white",
+            "fontSize": "11px"
+        }
+    )
+
+    return (
+        df.to_dict("records"),
+        mini_charts,
+        mini_tables,
+        table
+    )
