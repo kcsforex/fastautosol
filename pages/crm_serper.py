@@ -23,7 +23,6 @@ CARD_STYLE = { "background": "rgba(255, 255, 255, 0.03)", "backdrop-filter": "bl
 # LAYOUT
 # -------------------
 DASH_ID_TAG = 'serper'
-
 layout = dbc.Container([
 
     html.Div([
@@ -89,7 +88,6 @@ def load_data_render(_):
     # -------------------
     # MINI CHARTS
     # -------------------
-
     mini_charts = []
     def make_card(title, content, is_graph=True):
 
@@ -153,4 +151,4 @@ def load_data_render(_):
     table = dbc.Table.from_dataframe(log_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
         style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white", "fontSize": "11px"})
 
-    return (df.to_dict("records"), mini_charts, mini_tables, table)
+    return df.to_dict("records"), mini_charts, mini_tables, table
