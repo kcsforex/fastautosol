@@ -1,4 +1,4 @@
-# 2026.05.09  11.00
+# 2026.05.09  18.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -87,17 +87,10 @@ def load_data_render(_):
     df["_ingested_at"] = pd.to_datetime(df["_ingested_at"], errors="coerce")
 
     # clean emails
-    df["email"] = (
-        df["email"]
-        .fillna("")
-        .astype(str)
-        .str.replace(" ", "", regex=False)
-    )
-
+    df["email"] = df["email"].fillna("").astype(str).str.replace(" ", "", regex=False)
+    
     # email count
-    df["email_count"] = df["email"].apply(
-        lambda x: len([e for e in x.split(",") if e.strip()])
-    )
+    df["email_count"] = df["email"].apply(lambda x: len([e for e in x.split(",") if e.strip()]))
 
     # website domain
     df["has_website"] = df["website"].notna()
@@ -106,11 +99,8 @@ def load_data_render(_):
     df["has_phone"] = df["phone_number"].notna()
 
     # deduplicate by cid
-    df = (
-        df.sort_values("_ingested_at")
-        .drop_duplicates(subset=["cid"], keep="last")
-    )
-
+    df = df.sort_values("_ingested_at").drop_duplicates(subset=["cid"], keep="last")
+    
     # -------------------
     # MINI CHARTS
     # -------------------
@@ -120,74 +110,24 @@ def load_data_render(_):
     def make_card(title, content, is_graph=True):
 
         if is_graph:
-            content.update_layout(
-                height=220,
-                margin=dict(l=10, r=10, t=25, b=10),
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="white")
-            )
+            content.update_layout(height=220, margin=dict(l=10, r=10, t=25, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
 
         return dbc.Col([
             html.Div([
-                html.H6(
-                    title,
-                    className="mb-2",
-                    style={"color": "#f59e0b", "fontWeight": "500"}
-                ),
-
-                dcc.Graph(
-                    figure=content,
-                    config={"displayModeBar": False},
-                    style={"height": "220px"}
-                ) if is_graph else content
-
+                html.H6(title, className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
+                dcc.Graph(figure=content, config={"displayModeBar": False}, style={"height": "220px"}) if is_graph else content
             ], style=CARD_STYLE)
         ], md=4)
 
     # 1 Top Categories
-    cat_df = (
-        df["category"]
-        .value_counts()
-        .head(15)
-        .reset_index()
-    )
-
+    cat_df = df["category"].value_counts().head(15).reset_index()
     cat_df.columns = ["category", "count"]
-
-    mini_charts.append(
-        make_card(
-            "Top Categories",
-            px.bar(
-                cat_df,
-                x="category",
-                y="count",
-                template="plotly_dark"
-            )
-        )
-    )
+    mini_charts.append(make_card("Top Categories", px.bar(cat_df, x="category", y="count", template="plotly_dark")))
 
     # 2 Top Cities
-    city_df = (
-        df["city"]
-        .value_counts()
-        .head(15)
-        .reset_index()
-    )
-
+    city_df = df["city"].value_counts().head(15).reset_index()
     city_df.columns = ["city", "count"]
-
-    mini_charts.append(
-        make_card(
-            "Top Cities",
-            px.bar(
-                city_df,
-                x="city",
-                y="count",
-                template="plotly_dark"
-            )
-        )
-    )
+    mini_charts.append(make_card("Top Cities", px.bar(city_df, x="city", y="count", template="plotly_dark")))
 
     # 3 Ratings Distribution
     rating_df = df[df["rating"].notna()]
