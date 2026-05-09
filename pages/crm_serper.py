@@ -37,7 +37,7 @@ layout = dbc.Container([
     dcc.Interval(id='refresh', interval=60000),
     dcc.Store(id=f"{DASH_ID_TAG}-df-store"),
 
-    # ---- 6 MINI CHART GRID (LIKE BYBIT) ----
+    # ---- 6 MINI CHART GRID ----
     dbc.Row(id=f"{DASH_ID_TAG}-mini-charts", className="g-3 mb-4"),
 
     # ---- 3 SMALL KPI TABLE ----
@@ -45,7 +45,7 @@ layout = dbc.Container([
 
     # ---- LOG TABLE ----
     html.Div([
-        html.H5("Lufthansa Logs", className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
+        html.H5("CRM Serper Logs", className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
         html.Div(id=f"{DASH_ID_TAG}-log-table",
             style={"height": "300px", "overflowY": "auto", "fontSize": "12px"})
     ], style=CARD_STYLE)
@@ -69,7 +69,9 @@ def load_data_render(_):
         df_c = pd.read_sql("SELECT * FROM serper.companies", conn)
         df_ce = pd.read_sql("SELECT * FROM serper.companies_email", conn)
 
-    if df.empty:
+    if df_c.empty:
+        return None, [], [], None
+    if df_ce.empty:
         return None, [], [], None
 
     # ---- parse dates (combine date + time columns) ----
