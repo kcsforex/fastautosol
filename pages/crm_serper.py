@@ -79,26 +79,16 @@ def load_data_render(_):
     # normalize UNKNOWN
     df = df.replace("UNKNOWN", pd.NA)
 
-    # parse numeric
     df["rating"] = pd.to_numeric(df["rating"], errors="coerce")
     df["reviews"] = pd.to_numeric(df["reviews"], errors="coerce")
 
-    # parse datetime
     df["_ingested_at"] = pd.to_datetime(df["_ingested_at"], errors="coerce")
 
-    # clean emails
-    df["email"] = df["email"].fillna("").astype(str).str.replace(" ", "", regex=False)
-    
-    # email count
+    df["email"] = df["email"].fillna("").astype(str).str.replace(" ", "", regex=False)   
     df["email_count"] = df["email"].apply(lambda x: len([e for e in x.split(",") if e.strip()]))
 
-    # website domain
     df["has_website"] = df["website"].notna()
-
-    # phone exists
     df["has_phone"] = df["phone_number"].notna()
-
-    # deduplicate by cid
     df = df.sort_values("_ingested_at").drop_duplicates(subset=["cid"], keep="last")
     
     # -------------------
@@ -131,59 +121,15 @@ def load_data_render(_):
 
     # 3 Ratings Distribution
     rating_df = df[df["rating"].notna()]
-
-    mini_charts.append(
-        make_card(
-            "Ratings Distribution",
-            px.histogram(
-                rating_df,
-                x="rating",
-                nbins=20,
-                template="plotly_dark"
-            )
-        )
-    )
+    mini_charts.append(make_card("Ratings Distribution", px.histogram(rating_df, x="rating", nbins=20, template="plotly_dark")))
 
     # 4 Review Leaders
-    review_df = (
-        df[["name", "reviews"]]
-        .dropna()
-        .sort_values("reviews", ascending=False)
-        .head(15)
-    )
-
-    mini_charts.append(
-        make_card(
-            "Most Reviewed",
-            px.bar(
-                review_df,
-                x="name",
-                y="reviews",
-                template="plotly_dark"
-            )
-        )
-    )
+    review_df = df[["name", "reviews"]].dropna().sort_values("reviews", ascending=False).head(15)
+    mini_charts.append(make_card("Most Reviewed", px.bar(review_df, x="name", y="reviews", template="plotly_dark")))
 
     # 5 Email Availability
-    email_stats = pd.DataFrame({
-        "type": ["Has Email", "No Email"],
-        "count": [
-            df["email"].astype(bool).sum(),
-            (~df["email"].astype(bool)).sum()
-        ]
-    })
-
-    mini_charts.append(
-        make_card(
-            "Email Coverage",
-            px.pie(
-                email_stats,
-                names="type",
-                values="count",
-                hole=0.4
-            )
-        )
-    )
+    email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
+    mini_charts.append(make_card("Email Coverage", px.pie(email_stats, names="type", values="count", hole=0.4)))
 
     # 6 Avg Rating by Category
     avg_rating = (
