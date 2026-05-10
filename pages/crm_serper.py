@@ -140,7 +140,7 @@ def load_data_render(_):
 
     top_rated_df = df[["name", "city", "rating", "reviews"]].dropna(subset=["rating"]).sort_values(["rating", "reviews"], ascending=False).head(10)
     top_rated_df["name"] = top_rated_df["name"].apply(lambda x: str(x)[:30] + "..." if len(str(x)) > 30 else str(x))
-    top_rated_df["rating"] = top_rated_df["rating"].round(1)
+    top_rated_df["rating"] = top_rated_df["rating"].apply(lambda x: "{:.1f}".format(x))
     
     most_reviews_df = df[["name", "city", "reviews"]].dropna(subset=["reviews"]).sort_values("reviews", ascending=False).head(10)
     most_reviews_df["name"] = most_reviews_df["name"].apply(lambda x: str(x)[:30] + "..." if len(str(x)) > 30 else str(x))  
