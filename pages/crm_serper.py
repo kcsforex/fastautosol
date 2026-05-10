@@ -147,7 +147,7 @@ def load_data_render(_):
     # -------------------
     log_cols = ["name", "city", "category", "rating", "reviews", "email", "phone_number", "website", "_ingested_at"]
     log_df = df[log_cols].sort_values("_ingested_at", ascending=False).head(100) 
-    log_df = log_df.applymap(lambda x: str(x)[:30] if isinstance(x, str) else x)
+    log_df = log_df.map(lambda x: str(x)[:40] if isinstance(x, str) else x)
     
     table = dbc.Table.from_dataframe(log_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
         style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white", "fontSize": "11px"})
