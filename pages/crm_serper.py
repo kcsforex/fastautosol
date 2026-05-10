@@ -124,7 +124,7 @@ def load_data_render(_):
     # 5 Email Availability
     email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
     fig = px.pie(email_stats, names="type", values="count", hole=0.4, template="plotly_dark")
-    fig.update_traces(textinfo="percent+value", textposition="inside") #, hovertemplate="Type: %{label}<br>Count: %{value}<br>Percentage: %{percent}")
+    fig.update_traces(textinfo="percent+value", textposition="inside")
     mini_charts.append(make_card("Email Coverage", fig))
        
     #email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
@@ -160,6 +160,7 @@ def load_data_render(_):
     # -------------------
     log_cols = ["name", "city", "category", "rating", "reviews", "email", "phone_number", "website", "_ingested_at"]
     log_df = df[log_cols].sort_values("_ingested_at", ascending=False).head(100) 
+    log_df["_ingested_at"] = pd.to_datetime(log_df["_ingested_at"]).dt.strftime('%Y-%m-%d %H:%M:%S')
     log_df = log_df.map(lambda x: str(x)[:40] if isinstance(x, str) else x)
     
     table = dbc.Table.from_dataframe(log_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
