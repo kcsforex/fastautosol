@@ -52,7 +52,7 @@ layout = dbc.Container([
 def update_dashboard(n_intervals):
 
     with sql_engine.connect() as conn:
-        df = pd.read_sql("""SELECT timestamp, symbol, close, ema150, price24hpcnt, prevprice1h, fundingrate 
+        df = pd.read_sql("""SELECT timestamp, symbol, close, ema150, price24hpcnt, funding
         FROM bybit_data.bybit_candles ORDER BY timestamp DESC LIMIT 5000""", conn)
 
     if df.empty:
