@@ -1,4 +1,5 @@
-# 2026.03.31  18.00
+# 2026.05.10  18.00
+# https://www.whaletrades.io/data-hub#coin-sentiment
 import pandas as pd
 from datetime import datetime
 from fastapi import APIRouter
