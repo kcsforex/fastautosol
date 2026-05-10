@@ -123,8 +123,8 @@ def load_data_render(_):
 
     # 5 Email Availability
     email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
-    fig = px.pie(email_stats, names="type", values="count", hole=0.4, template="plotly_dark")
-    fig.update_traces(textinfo="percent+value", textposition="inside", hovertemplate="Type: %{label}<br>Count: %{value}<br>Percentage: %{percent}")
+    fig = px.pie(email_stats, names="type", values="count", hole=0.4, textinfo="percent+value", textposition="inside", template="plotly_dark")
+    #fig.update_traces(textinfo="percent+value", textposition="inside", hovertemplate="Type: %{label}<br>Count: %{value}<br>Percentage: %{percent}")
     mini_charts.append(make_card("Email Coverage", fig))
        
     #email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
