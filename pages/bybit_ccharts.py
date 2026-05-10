@@ -49,7 +49,7 @@ layout = dbc.Container([
 def update_dashboard(n_intervals):
 
     with sql_engine.connect() as conn:
-        df = pd.read_sql("SELECT symbol, timestamp, open, high, low, close, turnover24h, ema150 FROM bybit_crypto_candles ORDER BY timestamp DESC LIMIT 1500", conn)
+        df = pd.read_sql("SELECT symbol, timestamp, open, high, low, close, turnover24h, ema150 FROM bybit_data.bybit_candles ORDER BY timestamp DESC LIMIT 1500", conn)
 
     if df.empty:
         return [html.Div("No data found", className="text-light fst-italic"),  None]
