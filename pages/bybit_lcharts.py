@@ -1,4 +1,4 @@
-# 2026.03.18  18.00
+# 2026.05.10  18.00
 import pandas as pd
 from datetime import datetime
 from fastapi import APIRouter
@@ -52,15 +52,13 @@ layout = dbc.Container([
 def update_dashboard(n_intervals):
 
     with sql_engine.connect() as conn:
-        df = pd.read_sql("""SELECT timestamp, symbol, close, ema50, ema100, ema150, price24hpcnt, prevprice1h, fundingrate 
-        FROM bybit_crypto_candles ORDER BY timestamp DESC LIMIT 5000""", conn)
+        df = pd.read_sql("""SELECT timestamp, symbol, close, ema150, price24hpcnt, prevprice1h, fundingrate 
+        FROM bybit_data.bybit_candles ORDER BY timestamp DESC LIMIT 5000""", conn)
 
     if df.empty:
         return [html.Div("No data found", className="text-light fst-italic"),  None, None, None] 
   
     latest = df.sort_values("timestamp").groupby("symbol").last().reset_index() 
-    df["ema50"] =  df["ema50"].round(2)
-    df["ema100"] =  df["ema100"].round(2)
     df["ema150"] =  df["ema150"].round(2)
 
     metrics_update = f"Updated -> {latest["timestamp"].iloc[0]}"
