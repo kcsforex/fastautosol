@@ -1,4 +1,4 @@
-# 2026.05.10  11.00
+# 2026.05.10  12.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -138,12 +138,15 @@ def load_data_render(_):
         return dbc.Table.from_dataframe(df_table, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
             style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
-    top_rated = df[["name", "city", "rating", "reviews"]].dropna(subset=["rating"]).sort_values(["rating", "reviews"], ascending=False).head(10)
-    most_reviews = df[["name", "city", "reviews"]].dropna(subset=["reviews"]).sort_values("reviews", ascending=False).head(10)
+    top_rated_df = df[["name", "city", "rating", "reviews"]].dropna(subset=["rating"]).sort_values(["rating", "reviews"], ascending=False).head(10)
+    top_rated_df["name"] = top_rated_df["name"].apply(lambda x: str(x)[:30] + "..." if len(str(x)) > 30 else str(x)) 
+    
+    most_reviews_df = df[["name", "city", "reviews"]].dropna(subset=["reviews"]).sort_values("reviews", ascending=False).head(10)
+    most_reviews_df["name"] = most_reviews_df["name"].apply(lambda x: str(x)[:30] + "..." if len(str(x)) > 30 else str(x))  
     
     mini_tables = [
-        make_card("Top Rated", make_table(top_rated), is_graph=False, md_col=6),
-        make_card("Most Reviews", make_table(most_reviews), is_graph=False, md_col=6),
+        make_card("Top Rated", make_table(top_rated_df), is_graph=False, md_col=6),
+        make_card("Most Reviews", make_table(most_reviews_df), is_graph=False, md_col=6),
     ]
 
     # -------------------
