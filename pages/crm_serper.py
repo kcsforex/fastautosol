@@ -1,4 +1,4 @@
-# 2026.05.09  18.00
+# 2026.05.10  9.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -147,10 +147,7 @@ def load_data_render(_):
     # -------------------
     log_cols = ["name", "city", "category", "rating", "reviews", "email", "phone_number", "website", "_ingested_at"]
     log_df = df[log_cols].sort_values("_ingested_at", ascending=False).head(100) 
-    limits = {"name": 40, "city": 20, "category": 30, "email": 35, "website": 4}
-
-    for col, limit in limits.items():
-        log_df[col] = log_df[col].astype(str).apply(lambda v: v if len(v) <= limit else v[:limit] + "...")
+    log_df = log_df.applymap(lambda x: str(x)[:30] if isinstance(x, str) else x)
     
     table = dbc.Table.from_dataframe(log_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
         style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white", "fontSize": "11px"})
