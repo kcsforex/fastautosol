@@ -1,4 +1,4 @@
-# 2026.05.10  12.00
+# 2026.05.10  18.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -103,7 +103,7 @@ def load_data_render(_):
     # 1 Top Categories
     #df["category"] = df["category"].astype(str).str[:12]  #.str.slice(0, 30)   
     cat_df = df["category"].value_counts().head(15).reset_index()
-    cat_df["category"] = cat_df["category"].apply(lambda x: str(x)[:10] + "..." if len(str(x)) > 12 else str(x))   
+    cat_df["category"] = cat_df["category"].apply(lambda x: str(x)[:12] + "..." if len(str(x)) > 12 else str(x))   
     cat_df.columns = ["category", "count"]
     mini_charts.append(make_card("Top Categories", px.bar(cat_df, x="category", y="count", template="plotly_dark")))
 
@@ -118,16 +118,21 @@ def load_data_render(_):
 
     # 4 Review Leaders
     review_df = df[["name", "reviews"]].dropna().sort_values("reviews", ascending=False).head(15)
-    review_df["name"] = review_df["name"].apply(lambda x: str(x)[:10] + "..." if len(str(x)) > 12 else str(x))  
+    review_df["name"] = review_df["name"].apply(lambda x: str(x)[:12] + "..." if len(str(x)) > 12 else str(x))  
     mini_charts.append(make_card("Most Reviewed", px.bar(review_df, x="name", y="reviews", template="plotly_dark")))
 
     # 5 Email Availability
     email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
-    mini_charts.append(make_card("Email Coverage", px.pie(email_stats, names="type", values="count", hole=0.4)))
+    fig = px.pie(email_stats, names="type", values="count", hole=0.4, template="plotly_dark")
+    fig.update_traces(textinfo="percent+value", textposition="inside", hovertemplate="Type: %{label}<br>Count: %{value}<br>Percentage: %{percent}")
+    mini_charts.append(make_card("Email Coverage", fig))
+       
+    #email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
+    #mini_charts.append(make_card("Email Coverage", px.pie(email_stats, names="type", values="count", hole=0.4)))
 
     # 6 Avg Rating by Category
     avg_rating_df = df.groupby("category")["rating"].mean().dropna().sort_values(ascending=False).head(15).reset_index() 
-    avg_rating_df["category"] = avg_rating_df["category"].apply(lambda x: str(x)[:10] + "..." if len(str(x)) > 12 else str(x)) 
+    avg_rating_df["category"] = avg_rating_df["category"].apply(lambda x: str(x)[:12] + "..." if len(str(x)) > 12 else str(x)) 
     mini_charts.append(make_card("Avg Rating by Category", px.bar(avg_rating_df, x="category", y="rating", text_auto='.1f', template="plotly_dark")))
  
     # -------------------
