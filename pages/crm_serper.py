@@ -102,6 +102,7 @@ def load_data_render(_):
 
     # 1 Top Categories
     cat_df = df["category"].value_counts().head(15).reset_index()
+    df["category"] = df["category"].astype(str).str[:15]  #.str.slice(0, 30)
     cat_df.columns = ["category", "count"]
     mini_charts.append(make_card("Top Categories", px.bar(cat_df, x="category", y="count", template="plotly_dark")))
 
