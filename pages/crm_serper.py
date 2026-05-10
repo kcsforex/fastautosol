@@ -1,4 +1,4 @@
-# 2026.05.10  9.00
+# 2026.05.10  11.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -117,6 +117,7 @@ def load_data_render(_):
     mini_charts.append(make_card("Ratings Distribution", px.histogram(rating_df, x="rating", nbins=20, template="plotly_dark")))
 
     # 4 Review Leaders
+    review_df["name"] = df["name"].apply(lambda x: str(x)[:10] + "..." if len(str(x)) > 12 else str(x))  
     review_df = df[["name", "reviews"]].dropna().sort_values("reviews", ascending=False).head(15)
     mini_charts.append(make_card("Most Reviewed", px.bar(review_df, x="name", y="reviews", template="plotly_dark")))
 
