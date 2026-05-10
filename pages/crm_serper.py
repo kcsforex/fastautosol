@@ -138,11 +138,11 @@ def load_data_render(_):
         return dbc.Table.from_dataframe(df_table, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
             style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
-    top_rated_df = df[["name", "city", "rating", "reviews"]].dropna(subset=["rating"]).sort_values(["rating", "reviews"], ascending=False).head(10)
+    top_rated_df = df[["name", "city", "rating", "reviews"]].dropna(subset=["rating"]).sort_values(["rating", "reviews"], ascending=False).head(25)
     top_rated_df["name"] = top_rated_df["name"].apply(lambda x: str(x)[:30] + "..." if len(str(x)) > 30 else str(x))
     top_rated_df["rating"] = top_rated_df["rating"].apply(lambda x: "{:.1f}".format(x))
     
-    most_reviews_df = df[["name", "city", "reviews"]].dropna(subset=["reviews"]).sort_values("reviews", ascending=False).head(10)
+    most_reviews_df = df[["name", "city", "reviews"]].dropna(subset=["reviews"]).sort_values("reviews", ascending=False).head(25)
     most_reviews_df["name"] = most_reviews_df["name"].apply(lambda x: str(x)[:30] + "..." if len(str(x)) > 30 else str(x))  
     
     mini_tables = [
