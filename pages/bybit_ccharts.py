@@ -49,14 +49,12 @@ layout = dbc.Container([
 def update_dashboard(n_intervals):
 
     with sql_engine.connect() as conn:
-        df = pd.read_sql("SELECT symbol, timestamp, open, high, low, close, turnover24h, ema50, ema100, ema150 FROM bybit_crypto_candles ORDER BY timestamp DESC LIMIT 2500", conn)
+        df = pd.read_sql("SELECT symbol, timestamp, open, high, low, close, turnover24h, ema150 FROM bybit_crypto_candles ORDER BY timestamp DESC LIMIT 1500", conn)
 
     if df.empty:
         return [html.Div("No data found", className="text-light fst-italic"),  None]
 
     df["timestamp"] = pd.to_datetime(df["timestamp"])
-    df["ema50"] =  df["ema50"].round(2)
-    df["ema100"] =  df["ema100"].round(2)
     df["ema150"] =  df["ema150"].round(2)
 
     crypto_ccharts = []
@@ -77,8 +75,6 @@ def update_dashboard(n_intervals):
             decreasing_line_color="#ff4976"
         ))
 
-        fig.add_trace(go.Scatter( x=chart_df["timestamp"].dt.strftime("%H:%M"), y=chart_df["ema50"], line=dict(color="orange", width=1), name="EMA50"))
-        fig.add_trace(go.Scatter( x=chart_df["timestamp"].dt.strftime("%H:%M"), y=chart_df["ema100"], line=dict(color="cyan", width=1), name="EMA100"))
         fig.add_trace(go.Scatter( x=chart_df["timestamp"].dt.strftime("%H:%M"), y=chart_df["ema150"], line=dict(color="cyan", width=1), name="EMA150"))
 
         fig.update_layout(
