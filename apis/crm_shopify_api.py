@@ -1,4 +1,4 @@
-# 2026.04.25  16.00
+# 2026.05.11  15.00
 from fastapi import APIRouter
 import dlt
 from dlt.pipeline.exceptions import PipelineStepFailed
@@ -69,7 +69,7 @@ def generate_crm():
     pipeline = dlt.pipeline(
         pipeline_name="fake_shopify",
         destination=dlt.destinations.postgres(credentials=DB_CONFIG),
-        dataset_name="shopify")
+        dataset_name="crm_shopify")
 
     try:
         load_info = pipeline.run(tickets_resource(data), write_disposition="append")
