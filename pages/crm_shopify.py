@@ -153,10 +153,16 @@ def load_data_render(_):
     df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce")
     df = df.dropna(subset=["created_at"])   
     df["total_price"] = pd.to_numeric(df["total_price"], errors="coerce").fillna(0) 
-    df["customer_total_spent"] = df["customer"].str.extract(r'total_spent:([\d.]+)').astype(float).fillna(0) 
-    df["customer_orders"] = df["customer"].str.extract(r'orders_count:([\d.]+)').astype(float).fillna(0) 
-    df["customer_country"] = df["customer"].str.extract(r'country:([\d.]+)').astype(float).fillna(0) 
-    df["customer_email"] = df["customer"].str.extract(r'email:([\d.]+)').astype(float).fillna(0) 
+    
+    df["customer_total_spent"] = df["customer"].str.extract(r'total_spent:([\d.]+)')
+    df["customer_total_spent"] = pd.to_numeric(df["customer_total_spent"], errors="coerce").fillna(0) 
+    
+    df["customer_orders"] = df["customer"].str.extract(r'orders_count:([\d.]+)')
+    df["customer_orders"] = pd.to_numeric(df["customer_orders"], errors="coerce").fillna(0) 
+
+    df["customer_country"] = df["customer"].str.extract(r'country:([\d.]+)').fillna(0)    
+    df["customer_email"] = df["customer"].str.extract(r'email:([\d.]+)').fillna(0) 
+
     df["day"] = df["created_at"].dt.date
     df["hour"] = df["created_at"].dt.hour.fillna(0)    
     df["intent"] = df["intent"].fillna("unknown")
