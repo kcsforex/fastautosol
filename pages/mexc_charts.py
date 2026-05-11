@@ -1,4 +1,4 @@
-# 2026.05.03  18.00
+# 2026.05.11  18.00
 import pandas as pd
 from datetime import datetime
 from fastapi import APIRouter
@@ -59,7 +59,7 @@ def update_dashboard(n_intervals, n_charts):
     xstocks_charts = []
     for symbol in XSTOCKS[:n_charts]:
         chart_df = df[df["symbol"] == symbol].sort_values("timestamp")
-        #name = chart_df["name"].iloc[0]
+        stock_symbol= chart_df["symbol"].str[:-5]
         
         if chart_df.empty: continue
 
@@ -77,7 +77,7 @@ def update_dashboard(n_intervals, n_charts):
         xstocks_charts.append(
             dbc.Col([
                 html.Div([
-                    html.H6(f"{symbol} - name", className="text-success mb-1"),
+                    html.H6(f"{stock_symbol}", className="text-success mb-1"),
                     dcc.Graph(figure=fig, config={'displayModeBar': False})
                 ], style=CARD_STYLE)
             ], width=3, className="mb-1")
