@@ -66,8 +66,8 @@ layout = dbc.Container([
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-        #df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
-        df = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
+        df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
+        #df = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
             FROM lufthansa.flights ORDER BY departure__scheduled__date, departure__scheduled__time, route_key DESC""", conn)     
     if df.empty:
         return "No data", None, [], [], None
