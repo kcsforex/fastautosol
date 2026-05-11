@@ -72,10 +72,10 @@ def generate_crm():
         dataset_name="crm_shopify")
 
     try:
-        load_info = pipeline.run(tickets_resource(data), write_disposition="append")
+        load_info = pipeline.run(tickets_resource(data), write_disposition="merge", primary_key=["ticket_id", "created_at"])
 
     except PipelineStepFailed as e:    
-        if e.step == "load" and "does not exist" in str(e).lower():
+        if e.step == "load" or "does not exist" in str(e).lower():
             load_info = pipeline.run(tickets_resource(data), write_disposition="replace")
         else:
             raise
