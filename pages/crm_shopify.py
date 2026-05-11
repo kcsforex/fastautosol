@@ -105,15 +105,11 @@ def run_rag_search(n_clicks, query):
         text = r.get("text") or r.get("pageContent") or "No content"
 
         cards.append(
-            html.Div([
-                html.Div(f"Id:{ticketid} / {intent}", className="text-info small"),
+            html.Div([html.Div(f"Id:{ticketid} / {intent}", className="text-info small"),
                 html.Div(text[:200] + "...", className="text-light small"),
-                html.Hr()
-            ])
-        )
+                html.Hr() ]))
 
     return cards, answer
-
 
 @callback(
     Output('crm-rag-metrics-update', 'children'),
@@ -231,29 +227,12 @@ def load_data_render(_):
     intent_tbl.columns = ["intent", "count"]
 
     # Top customers
-    cust_tbl = (
-        df.groupby("customer_email", as_index=False)
-        .agg({
-            "total_price": "sum",
-            "customer_orders": "max",
-            "customer_total_spent": "max"
-        })
-        .sort_values("total_price", ascending=False)
-        .head(10)
-    )
-
+    cust_tbl = (df.groupby("customer_email", as_index=False).agg({"total_price": "sum", "customer_orders": "max", "customer_total_spent": "max"}).sort_values("total_price", ascending=False).head(10))
     cust_tbl["total_price"] = cust_tbl["total_price"].round(2)
     cust_tbl["customer_total_spent"] = cust_tbl["customer_total_spent"].round(2)
 
     # Top countries
-    country_tbl = (
-        df[df["customer_country"] != "Unknown"]
-        ["customer_country"]
-        .value_counts()
-        .head(10)
-        .reset_index()
-    )
-
+    country_tbl = (df[df["customer_country"] != "Unknown"]["customer_country"].value_counts().head(10).reset_index())
     country_tbl.columns = ["country", "count"]
 
     mini_tables = [
@@ -270,5 +249,3 @@ def load_data_render(_):
         style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
     return f"Updated → {df['created_at'].max()}", df.to_dict("records"), header_metrics, mini_charts, mini_tables, table
-    
-
