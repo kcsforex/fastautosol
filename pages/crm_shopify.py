@@ -1,4 +1,4 @@
-# 2026.05.11  15.00
+# 2026.05.11  18.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -150,20 +150,28 @@ def load_data_render(_):
 
     df = df.copy()
 
+    # 1. Fix Timestamp for "Tickets Over Time"
     df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce")
-    df = df.dropna(subset=["created_at"])   
+    df = df.dropna(subset=["created_at"])
+    
+    # Floor to 'D' (Day) so the chart groups by date, not millisecond
+    df["day"] = df["created_at"].dt.floor('D') 
     df["total_price"] = pd.to_numeric(df["total_price"], errors="coerce").fillna(0) 
     
-    df["customer_total_spent"] = df["customer"].str.extract(r'total_spent:([\d.]+)')
-    df["customer_total_spent"] = pd.to_numeric(df["customer_total_spent"], errors="coerce").fillna(0) 
+    # 2. Fix Regex for Customer Data
+    # Extract total_spent (Numbers and decimals)
+    df["customer_total_spent"] = df["customer"].str.extract(r'total_spent:([\d.]+)').astype(float).fillna(0)
     
-    df["customer_orders"] = df["customer"].str.extract(r'orders_count:([\d.]+)')
-    df["customer_orders"] = pd.to_numeric(df["customer_orders"], errors="coerce").fillna(0) 
+    # Extract orders_count (Numbers)
+    df["customer_orders"] = df["customer"].str.extract(r'orders_count:(\d+)').astype(float).fillna(0)
 
-    df["customer_country"] = df["customer"].str.extract(r'country:([\d.]+)').fillna('NA')    
-    df["customer_email"] = df["customer"].str.extract(r'email:([\d.]+)').fillna('NA') 
+    # Extract country (Letters - corrected regex)
+    df["customer_country"] = df["customer"].str.extract(r'country:([A-Z]{2,})').fillna('NA')    
+    
+    # Extract email (Standard email characters - corrected regex)
+    df["customer_email"] = df["customer"].str.extract(r'email:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})').fillna('Anonymous') 
 
-    df["day"] = df["created_at"].dt.date
+    # 3. Basic cleaning
     df["hour"] = df["created_at"].dt.hour.fillna(0)    
     df["intent"] = df["intent"].fillna("unknown")
     df["financial_status"] = df["financial_status"].fillna("unknown")
@@ -250,7 +258,7 @@ def load_data_render(_):
     intent_tbl.columns = ["intent", "count"]
     
     # Top customers
-    cust_tbl = df.groupby("customer_email")["total_price"].sum().sort_values(ascending=False).head(10).reset_index()
+    cust_tbl = df.groupby("customer_email")["total_price"].sum().round(2).sort_values(ascending=False).head(10).reset_index()
     
     # Country distribution
     country_tbl = df["customer_country"].value_counts().head(10).reset_index()
