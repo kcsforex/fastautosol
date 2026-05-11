@@ -1,4 +1,4 @@
-# 2026.04.22  18.00
+# 2026.05.11  15.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -11,7 +11,7 @@ import requests
 DB_CONFIG = "postgresql+psycopg://sql_admin:sql_pass@postgresql:5432/n8n"
 sql_engine = create_engine(DB_CONFIG, pool_size=5, max_overflow=10, pool_pre_ping=True)
 
-dash.register_page(__name__, icon="fa-coins", name="CRM RAG", order=3)
+dash.register_page(__name__, icon="fa-coins", name="CRM Shopify", order=3)
 
 N8N_WEBHOOK = "https://n8n.petrosofteu.cloud/webhook/rag-query"
 
@@ -40,7 +40,7 @@ CARD_STYLE = {
 layout = dbc.Container([
 
     html.Div([
-        html.H2("CRM Dashboard", className="text-light fw-bold mb-0"),
+        html.H2("Shopify CRM Dashboard", className="text-light fw-bold mb-0"),
         html.P(id='crm-rag-metrics-update', className="text-muted small"),
     ], className="mb-3"),
 
@@ -140,7 +140,7 @@ def load_data_render(_):
     with sql_engine.connect() as conn:
         #df = pd.read_sql("SELECT * FROM shopify.tickets", conn)
         try:
-            df = pd.read_sql("SELECT * FROM shopify.tickets LIMIT 5000", conn)
+            df = pd.read_sql("SELECT * FROM crm_shopify.tickets LIMIT 5000", conn)
         except Exception as e:
             print("SQL ERROR:", e)
             return f"SQL error: {e}", None, None, [], [], None
