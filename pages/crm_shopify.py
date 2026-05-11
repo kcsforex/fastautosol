@@ -17,12 +17,7 @@ N8N_WEBHOOK = "https://n8n.petrosofteu.cloud/webhook/rag-query"
 def call_n8n_rag(query: str, top_k: int = 5):
     try:
         payload = {"query": query, "top_k": top_k}
-        res = requests.post(
-            N8N_WEBHOOK,
-            json=payload,
-            timeout=30,
-            headers={"Content-Type": "application/json"}
-        )
+        res = requests.post(N8N_WEBHOOK, json=payload, timeout=30, headers={"Content-Type": "application/json"})
         return res.json()
 
     except requests.exceptions.Timeout:
@@ -65,40 +60,18 @@ layout = dbc.Container([
     dbc.Row([
         dbc.Col(
             html.Div(
-                html.Div(
-                    id="crm-rag-results",
-                    style={"maxHeight": "200px", "overflowY": "auto"}
-                ),
-                style=CARD_STYLE
-            ),
-            md=8
-        ),
+                html.Div(id="crm-rag-results", style={"maxHeight": "200px", "overflowY": "auto"}),  style=CARD_STYLE), md=8),
         dbc.Col(
             html.Div(
-                html.Div(
-                    id="crm-rag-answer",
-                    style={"maxHeight": "200px", "overflowY": "auto"}
-                ),
-                style=CARD_STYLE
-            ),
-            md=4
-        ),
+                html.Div(id="crm-rag-answer", style={"maxHeight": "200px", "overflowY": "auto"}), style=CARD_STYLE ),  md=4),
     ], className="g-3 mb-3"),
 
     dbc.Row(id="crm-rag-mini-charts", className="g-3 mb-4"),
-
     dbc.Row(id="crm-rag-mini-tables", className="g-3 mb-4"),
 
     html.Div([
-        html.H5(
-            "CRM Logs",
-            className="mb-2",
-            style={"color": "#f59e0b", "fontWeight": "500"}
-        ),
-        html.Div(
-            id='crm-rag-log-table',
-            style={"height": "300px", "overflowY": "auto", "fontSize": "12px"}
-        )
+        html.H5("CRM Logs", className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
+        html.Div( id='crm-rag-log-table', style={"height": "300px", "overflowY": "auto", "fontSize": "12px"})
     ], style=CARD_STYLE)
 
 ], fluid=True)
