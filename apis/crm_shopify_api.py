@@ -76,7 +76,7 @@ def generate_crm():
 
     except PipelineStepFailed as e:    
         if e.step == "load" or "does not exist" in str(e).lower():
-            load_info = pipeline.run(tickets_resource(data), write_disposition="replace")
+            load_info = pipeline.run(tickets_resource(data), write_disposition="append")
         else:
             raise
 
