@@ -7,7 +7,7 @@ from fastapi.middleware.wsgi import WSGIMiddleware
 from contextlib import asynccontextmanager
 import asyncio
 
-import apis.crm_shopify_api as crm_shopify
+import apis.crm_shopify_api as crm_shopify_api
 import apis.bybit_api as bybit
 import apis.kraken_api as kraken
 import apis.lufthansa_api as lufthansa
@@ -29,7 +29,7 @@ server = FastAPI(title="Dash Main App", lifespan=lambda app: youtube.mcp.session
 server.mount("/youtube", youtube.mcp.streamable_http_app())
 
 # ----- 4. API ROUTERS -----
-server.include_router(crm_shopify.router,   prefix="/api/crm_shopify",   tags=["CRM Shopify"])
+server.include_router(crm_shopify_api.router, prefix="/api/crm_shopify",   tags=["CRM Shopify"])
 server.include_router(bybit.router,         prefix="/api/bybit",         tags=["Bybit"])
 server.include_router(kraken.router,        prefix="/api/kraken",        tags=["Kraken"])
 server.include_router(lufthansa.router,     prefix="/api/lufthansa",     tags=["Lufthansa"])
