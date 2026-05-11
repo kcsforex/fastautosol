@@ -152,7 +152,7 @@ def load_data_render(_):
     # LOG TABLE
     # -------------------
     #table = dbc.Table.from_dataframe(df.tail(100), striped=False, borderless=True, className="text-light small")
-    status_cols = ["route_key", "status__description", "departure__actual__date", "departure__actual__time", "arrival__actual__date", "arrival__actual__time"]
+    status_cols = [["route_key", "status__description", "departure__actual__date", "departure__actual__time", "arrival__actual__date", "arrival__actual__time"]]
     table = dbc.Table.from_dataframe(df.iloc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
         className="text-light m-0", style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
