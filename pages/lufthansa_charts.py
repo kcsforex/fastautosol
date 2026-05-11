@@ -104,8 +104,8 @@ def load_data_render(_):
     ], md=4) #className="d-flex"
 
     # 1. Daily Chart
-    daily = df.groupby(df_daily["dep_sched_ts"].dt.floor("D")).size().reset_index(name="count")
-    fig = px.bar(daily, x="dep_sched_ts", y="count", template="plotly_dark")
+    daily = df.groupby(df_daily["dep__sched__ts"].dt.floor("D")).size().reset_index(name="count")
+    fig = px.bar(daily, x="dep__sched__ts", y="count", template="plotly_dark")
     fig.update_layout(height=250,  plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=10, b=10))
     mini_charts.append(make_card("Daily Chart", fig))
 
