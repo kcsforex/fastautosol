@@ -222,31 +222,12 @@ def load_data_render(_):
     # -----------------------------
     # TABLES
     # -----------------------------
-
     def make_table(df_table):
-        return dbc.Table.from_dataframe(
-            df_table,
-            striped=False,
-            hover=True,
-            responsive=True,
-            borderless=True,
-            className="text-light small",
-            style={
-                "backgroundColor": "transparent",
-                "--bs-table-bg": "transparent",
-                "--bs-table-accent-bg": "transparent",
-                "color": "white"
-            }
-        )
+        return dbc.Table.from_dataframe(df_table, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
+            style={ "backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
     # Top intents
-    intent_tbl = (
-        df["intent"]
-        .value_counts()
-        .head(10)
-        .reset_index()
-    )
-
+    intent_tbl = df["intent"].value_counts().head(10).reset_index()
     intent_tbl.columns = ["intent", "count"]
 
     # Top customers
