@@ -127,10 +127,8 @@ def run_rag_search(n_clicks, query):
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-
         try:
             df = pd.read_sql("SELECT * FROM crm_shopify.tickets LIMIT 5000", conn)
-
         except Exception as e:
             print("SQL ERROR:", e)
             return f"SQL error: {e}", None, None, [], [], None
@@ -143,17 +141,13 @@ def load_data_render(_):
     # -----------------------------
     # DATA CLEANING
     # -----------------------------
-
     df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce")
     df = df.dropna(subset=["created_at"])
 
     df["day"] = df["created_at"].dt.date
     df["hour"] = df["created_at"].dt.hour
 
-    df["total_price"] = pd.to_numeric(
-        df["total_price"],
-        errors="coerce"
-    ).fillna(0)
+    df["total_price"] = pd.to_numeric( df["total_price"], errors="coerce").fillna(0)
 
     for col in ["intent", "financial_status", "customer"]:
         if col in df.columns:
@@ -163,54 +157,16 @@ def load_data_render(_):
     # CUSTOMER PARSING
     # -----------------------------
 
-    spent_extract = df["customer"].str.extract(
-        r'total_spent["\\\': ]+([0-9.]+)',
-        expand=False
-    )
-
-    df["customer_total_spent"] = pd.to_numeric(
-        spent_extract,
-        errors="coerce"
-    ).fillna(df["total_price"])
-
-    orders_extract = df["customer"].str.extract(
-        r'(?:orders_count|orders)["\\\': ]+([0-9]+)',
-        expand=False
-    )
-
-    df["customer_orders"] = pd.to_numeric(
-        orders_extract,
-        errors="coerce"
-    ).fillna(1)
-
-    country_extract = df["customer"].str.extract(
-        r'country["\\\': ]+([A-Za-z]{2,})',
-        expand=False
-    )
-
-    df["customer_country"] = (
-        country_extract
-        .fillna("Unknown")
-        .replace("", "Unknown")
-    )
-
-    email_extract = df["customer"].str.extract(
-        r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
-        expand=False
-    )
-
-    df["customer_email"] = (
-        email_extract
-        .fillna("Anonymous")
-        .replace("", "Anonymous")
-    )
-
+    spent_extract = df["customer"].str.extract(r'total_spent["\\\': ]+([0-9.]+)', expand=False)
+    df["customer_total_spent"] = pd.to_numeric(spent_extract, errors="coerce").fillna(df["total_price"])
+    orders_extract = df["customer"].str.extract( r'(?:orders_count|orders)["\\\': ]+([0-9]+)', expand=False)
+    df["customer_orders"] = pd.to_numeric(orders_extract, errors="coerce").fillna(1)
+    country_extract = df["customer"].str.extract( r'country["\\\': ]+([A-Za-z]{2,})', expand=False)
+    df["customer_country"] = country_extract.fillna("Unknown").replace("", "Unknown")
+    email_extract = df["customer"].str.extract(r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})', expand=False)
+    df["customer_email"] = email_extract.fillna("Anonymous").replace("", "Anonymous")
     anonymous_mask = df["customer_email"] == "Anonymous"
-
-    df.loc[anonymous_mask, "customer_email"] = (
-        "guest_" + df.loc[anonymous_mask, "ticket_id"].astype(str)
-    )
-
+    df.loc[anonymous_mask, "customer_email"] = "guest_" + df.loc[anonymous_mask, "ticket_id"].astype(str)
     df["intent"] = df["intent"].replace("", "unknown")
     df["financial_status"] = df["financial_status"].replace("", "unknown")
     df["processed"] = df["processed"].fillna(False)
