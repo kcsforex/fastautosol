@@ -66,13 +66,11 @@ layout = dbc.Container([
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-        df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
-        df_daily = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
+        #df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
+        df = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
             FROM lufthansa.flights ORDER BY departure__scheduled__date, departure__scheduled__time, route_key DESC""", conn)     
     if df.empty:
         return "No data", None, [], [], None
-    if df_daily.empty:
-        return "No data"
 
     # ---- parse dates (combine date + time columns) ----
     df["dep_sched_dt"] = pd.to_datetime(df["departure__scheduled__date"] + " " + df["departure__scheduled__time"], errors="coerce")
@@ -104,8 +102,8 @@ def load_data_render(_):
     ], md=4) #className="d-flex"
 
     # 1. Daily Chart
-    daily_df = df.groupby(df_daily["dep__sched__ts"].dt.floor("D")).size().reset_index(name="count")
-    fig = px.bar(daily_df, x="dep__sched__ts", y="count", template="plotly_dark")
+    daily_df = df.groupby(df["dep_sched_ts"].dt.floor("D")).size().reset_index(name="count")
+    fig = px.bar(daily_df, x="dep_sched_ts", y="count", template="plotly_dark")
     fig.update_layout(height=250,  plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=10, b=10))
     mini_charts.append(make_card("Daily Chart", fig))
 
