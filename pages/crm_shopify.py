@@ -211,48 +211,13 @@ def load_data_render(_):
     mini_charts.append(make_card("Financial Status", px.bar(fin, x="status", y="count", template="plotly_dark")))
 
     # Customer Value
-    customer_value_df = (
-        df.groupby("customer_email", as_index=False)
-        .agg({
-            "customer_orders": "max",
-            "customer_total_spent": "max",
-            "total_price": "sum"
-        })
-    )
-
-    customer_value_df = customer_value_df[
-        (customer_value_df["customer_orders"] > 0) |
-        (customer_value_df["customer_total_spent"] > 0)
-    ]
-
-    mini_charts.append(make_card(
-        "Customer Value",
-        px.scatter(
-            customer_value_df,
-            x="customer_orders",
-            y="customer_total_spent",
-            size="total_price",
-            hover_name="customer_email",
-            template="plotly_dark"
-        )
-    ))
+    customer_value_df = (df.groupby("customer_email", as_index=False).agg({ "customer_orders": "max","customer_total_spent": "max","total_price": "sum"}))
+    customer_value_df = customer_value_df[(customer_value_df["customer_orders"] > 0) | (customer_value_df["customer_total_spent"] > 0)]
+    mini_charts.append(make_card("Customer Value", px.scatter(customer_value_df, x="customer_orders", y="customer_total_spent", size="total_price", hover_name="customer_email", template="plotly_dark")))
 
     # Tickets by Hour
-    hour = (
-        df.groupby("hour")
-        .size()
-        .reset_index(name="tickets")
-    )
-
-    mini_charts.append(make_card(
-        "Tickets by Hour",
-        px.line(
-            hour,
-            x="hour",
-            y="tickets",
-            template="plotly_dark"
-        )
-    ))
+    hour = (df.groupby("hour").size().reset_index(name="tickets"))
+    mini_charts.append(make_card("Tickets by Hour", px.line(hour, x="hour", y="tickets", template="plotly_dark")))
 
     # -----------------------------
     # TABLES
