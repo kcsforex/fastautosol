@@ -143,12 +143,9 @@ def load_data_render(_):
     # -----------------------------
     df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce")
     df = df.dropna(subset=["created_at"])
-
     df["day"] = df["created_at"].dt.date
     df["hour"] = df["created_at"].dt.hour
-
     df["total_price"] = pd.to_numeric( df["total_price"], errors="coerce").fillna(0)
-
     for col in ["intent", "financial_status", "customer"]:
         if col in df.columns:
             df[col] = df[col].fillna("").astype(str)
@@ -197,62 +194,21 @@ def load_data_render(_):
         ], md=4)
 
     # Tickets Over Time
-    ts = (
-        df.groupby("day")
-        .size()
-        .reset_index(name="tickets")
-        .sort_values("day")
-    )
-
-    mini_charts.append(make_card(
-        "Tickets Over Time",
-        px.line(
-            ts,
-            x="day",
-            y="tickets",
-            markers=True,
-            template="plotly_dark"
-        )
-    ))
+    ts = (df.groupby("day").size().reset_index(name="tickets").sort_values("day"))
+    mini_charts.append(make_card("Tickets Over Time", px.line(ts, x="day", y="tickets", markers=True, template="plotly_dark")))
 
     # Order Value Distribution
-    mini_charts.append(make_card(
-        "Order Value Dist",
-        px.histogram(
-            df,
-            x="total_price",
-            nbins=30,
-            template="plotly_dark"
-        )
-    ))
+    mini_charts.append(make_card("Order Value Dist", px.histogram( df,x="total_price", nbins=30,template="plotly_dark" )))
 
     # Intent Breakdown
     intent_df = df["intent"].value_counts().reset_index()
     intent_df.columns = ["intent", "count"]
-
-    mini_charts.append(make_card(
-        "Intent Breakdown",
-        px.pie(
-            intent_df,
-            names="intent",
-            values="count",
-            hole=0.4
-        )
-    ))
+    mini_charts.append(make_card("Intent Breakdown", px.pie( intent_df, names="intent", values="count", hole=0.4)))
 
     # Financial Status
     fin = df["financial_status"].value_counts().reset_index()
     fin.columns = ["status", "count"]
-
-    mini_charts.append(make_card(
-        "Financial Status",
-        px.bar(
-            fin,
-            x="status",
-            y="count",
-            template="plotly_dark"
-        )
-    ))
+    mini_charts.append(make_card("Financial Status", px.bar(fin, x="status", y="count", template="plotly_dark")))
 
     # Customer Value
     customer_value_df = (
