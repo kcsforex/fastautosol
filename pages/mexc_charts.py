@@ -25,9 +25,10 @@ CARD_STYLE = {
 }
 
 layout = dbc.Container([
-    html.Div([
-     
-            html.H2("MEXC xStocks", className="text-light fw-bold mb-0"),
+    html.Div([ 
+        html.H2("MEXC xStocks", className="text-light fw-bold mb-0")
+            ], className="mb-4"),
+    
             dcc.Interval(id='refresh', interval=60*1000), 
 
             dcc.Dropdown(id="chart-count", options=[{"label": str(i), "value": i} for i in [8,12,16,20,24,28,32]],
@@ -35,7 +36,7 @@ layout = dbc.Container([
             
             dbc.Row(id='xstocks-charts', className="g-3 mb-3"),
        
-    ])
+
 ], fluid=True)
 
 @callback(
