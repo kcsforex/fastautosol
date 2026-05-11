@@ -259,7 +259,7 @@ def load_data_render(_):
     # -------------------
     # LOG TABLE
     # -------------------
-    log_cols = ["ticket_id", "customer__email", "total_price", "intent", "financial_status", "created_at"]
+    log_cols = ["ticket_id", "customer_email", "total_price", "intent", "financial_status", "created_at"]
 
     table = dbc.Table.from_dataframe(df[log_cols].tail(100), striped=False, hover=True, responsive=True, borderless=True, className="text-light m-0",
         style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
