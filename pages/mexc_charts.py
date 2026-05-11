@@ -13,7 +13,7 @@ DB_CONFIG = "postgresql+psycopg://sql_admin:sql_pass@postgresql:5432/n8n"
 sql_engine = create_engine(DB_CONFIG, pool_size=5, max_overflow=10)
 
 # ----- 3. THE FRONTEND (Dash Sidebar uses this) -----
-dash.register_page(__name__, icon="fa-coins", name="MEXC stocks", order=5)
+dash.register_page(__name__, icon="fa-coins", name="MEXC Stocks", order=6)
 
 # Glassmorphism Card Style
 CARD_STYLE = {
