@@ -154,7 +154,9 @@ def load_data_render(_):
     df = df.dropna(subset=["created_at"])   
     df["total_price"] = pd.to_numeric(df["total_price"], errors="coerce").fillna(0) 
     df["customer_total_spent"] = df["customer"].str.extract(r'total_spent:([\d.]+)').astype(float).fillna(0) 
-    df["customer_orders"] = df["customer"].str.extract(r'orders_count:([\d.]+)').astype(float).fillna(0)   
+    df["customer_orders"] = df["customer"].str.extract(r'orders_count:([\d.]+)').astype(float).fillna(0) 
+    df["customer_country"] = df["customer"].str.extract(r'country:([\d.]+)').astype(float).fillna(0) 
+    df["customer_email"] = df["customer"].str.extract(r'email:([\d.]+)').astype(float).fillna(0) 
     df["day"] = df["created_at"].dt.date
     df["hour"] = df["created_at"].dt.hour.fillna(0)    
     df["intent"] = df["intent"].fillna("unknown")
@@ -242,10 +244,10 @@ def load_data_render(_):
     intent_tbl.columns = ["intent", "count"]
     
     # Top customers
-    cust_tbl = df.groupby("customer__email")["total_price"].sum().sort_values(ascending=False).head(10).reset_index()
+    cust_tbl = df.groupby("customer_email")["total_price"].sum().sort_values(ascending=False).head(10).reset_index()
     
     # Country distribution
-    country_tbl = df["customer__country"].value_counts().head(10).reset_index()
+    country_tbl = df["customer_country"].value_counts().head(10).reset_index()
     country_tbl.columns = ["country", "count"]
     
     mini_tables = [
