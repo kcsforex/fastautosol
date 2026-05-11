@@ -1,4 +1,4 @@
-# 2026.05.01 10.00 
+# 2026.05.11 18.00 
 import asyncio
 import ccxt.async_support as ccxt
 import dlt
@@ -16,7 +16,7 @@ FIX_SYMBOLS = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT', 'SUI/
                'ETC/USDT', 'COMP/USDT', 'AVAX/USDT', 'AXS/USDT', 'LINK/USDT', 'BCH/USDT', 'TIA/USDT' ,'ZEN/USDT'] 
 #BTC/USDT,ETH/USDT,SOL/USDT,XRP/USDT,SUI/USDT,HYPE/USDT,LTC/USDT,ETC/USDT,BNB/USDT,COMP/USDT,AVAX/USDT,LINK/USDT,BCH/USDT,TIA/USDT,ZEN/USDT,AXS/USDT
 POLL_INTERVAL = 75 
-CLEANUP_HOURS = 18
+CLEANUP_HOURS = 36
 
 class State:
     def __init__(self):
@@ -120,12 +120,8 @@ async def main():
                 if (now - state.last_cleanup_time) > 3600:
                     try:
                         print(f"[{datetime.now(UTC).isoformat(timespec='seconds')}] Cleanup Starting (older than {CLEANUP_HOURS}h)")                      
-                        with pipeline.sql_client() as client:
-
-                            # Dynamic Table Naming: Used client.make_qualified_table_name("bybit_candles"). 
-                            # This ensures the SQL query correctly points to bybit_data.bybit_candles (schema + table) based on dlt pipeline.      
-                            table_name = client.make_qualified_table_name("bybit_candles")
-                            
+                        with pipeline.sql_client() as client:    
+                            table_name = client.make_qualified_table_name("bybit_candles")                        
                             threshold = datetime.now(UTC) - timedelta(hours=CLEANUP_HOURS)
                             client.execute_sql(f"DELETE FROM {table_name} WHERE timestamp < %s", threshold)
                         state.last_cleanup_time = now
