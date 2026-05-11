@@ -160,8 +160,8 @@ def load_data_render(_):
     df["customer_orders"] = df["customer"].str.extract(r'orders_count:([\d.]+)')
     df["customer_orders"] = pd.to_numeric(df["customer_orders"], errors="coerce").fillna(0) 
 
-    df["customer_country"] = df["customer"].str.extract(r'country:([\d.]+)').fillna(0)    
-    df["customer_email"] = df["customer"].str.extract(r'email:([\d.]+)').fillna(0) 
+    df["customer_country"] = df["customer"].str.extract(r'country:([\d.]+)').fillna('NA')    
+    df["customer_email"] = df["customer"].str.extract(r'email:([\d.]+)').fillna('NA') 
 
     df["day"] = df["created_at"].dt.date
     df["hour"] = df["created_at"].dt.hour.fillna(0)    
