@@ -1,4 +1,4 @@
-# 2026.05.10  12.00
+# 2026.05.11  14.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -121,7 +121,7 @@ def load_data_render(_):
     mini_charts.append(make_card("Arrival Airports", px.bar(airport, x="airport", y="count", template="plotly_dark")))
 
     # 5 Status
-    status = df["status__code"].value_counts().reset_index()
+    status = df["status__description"].value_counts().reset_index()
     status.columns = ["status", "count"]
     mini_charts.append(make_card("Status", px.pie(status, names="status", values="count", hole=0.4)))
 
@@ -133,8 +133,8 @@ def load_data_render(_):
     # -------------------
     # 3 SMALL TABLE
     # -------------------
-    dep_tbl = (df.groupby("route_key")["dep_delay_min"].mean().round(2).sort_values(ascending=False).head(10).reset_index())
-    arr_tbl = (df.groupby("route_key")["arr_delay_min"].mean().round(2).sort_values(ascending=False).head(10).reset_index())   
+    dep_tbl = (df.groupby("route_key")["dep_delay_min"].mean().round(2).sort_values(ascending=False).head(25).reset_index())
+    arr_tbl = (df.groupby("route_key")["arr_delay_min"].mean().round(2).sort_values(ascending=False).head(25).reset_index())   
     route_cnt = (df["route_key"].value_counts().head(10).reset_index())
     route_cnt.columns = ["route_key", "count"]
 
@@ -152,7 +152,7 @@ def load_data_render(_):
     # LOG TABLE
     # -------------------
     #table = dbc.Table.from_dataframe(df.tail(100), striped=False, borderless=True, className="text-light small")
-    status_cols = [1, 23, 24, 14, 15]
+    status_cols = ["route_key", "status__description", "departure__actual__date", "departure__actual__time", "arrival__actual__date", "arrival__actual__time"]
     table = dbc.Table.from_dataframe(df.iloc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
         className="text-light m-0", style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
