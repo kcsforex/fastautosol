@@ -56,29 +56,10 @@ layout = dbc.Container([
     dbc.Row([
         dbc.Col(
             html.Div(
-                dcc.Input(
-                    id="crm-rag-query",
-                    placeholder="Type query",
-                    type="text",
-                    className="mb-0",
-                    style={"color": "black"}
-                ),
-                style=CARD_STYLE
-            ),
-            md=9
-        ),
+                dcc.Input(id="crm-rag-query", placeholder="Type query", type="text", className="mb-0", style={"color": "black"}), style=CARD_STYLE), md=9),
         dbc.Col(
             html.Div(
-                html.Button(
-                    "Search",
-                    id="crm-rag-btn",
-                    n_clicks=0,
-                    className="btn btn-warning w-100"
-                ),
-                style=CARD_STYLE
-            ),
-            md=3
-        ),
+                html.Button("Search", id="crm-rag-btn", n_clicks=0, className="btn btn-warning w-100"), style=CARD_STYLE), md=3),
     ], className="g-3 mb-3"),
 
     dbc.Row([
@@ -175,10 +156,7 @@ def load_data_render(_):
     with sql_engine.connect() as conn:
 
         try:
-            df = pd.read_sql(
-                "SELECT * FROM crm_shopify.tickets LIMIT 5000",
-                conn
-            )
+            df = pd.read_sql("SELECT * FROM crm_shopify.tickets LIMIT 5000", conn)
 
         except Exception as e:
             print("SQL ERROR:", e)
