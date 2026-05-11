@@ -154,7 +154,7 @@ def load_data_render(_):
     df = df.dropna(subset=["created_at"])   
     df["total_price"] = pd.to_numeric(df["total_price"], errors="coerce").fillna(0) 
     df["customer_total_spent"] = df["customer"].str.extract(r'total_spent:([\d.]+)').astype(float).fillna(0) 
-    df["customer_orders"] = df["customer_orders"].str.extract(r'orders_count:([\d.]+)').astype(float).fillna(0)   
+    df["customer_orders"] = df["customer"].str.extract(r'orders_count:([\d.]+)').astype(float).fillna(0)   
     df["day"] = df["created_at"].dt.date
     df["hour"] = df["created_at"].dt.hour.fillna(0)    
     df["intent"] = df["intent"].fillna("unknown")
