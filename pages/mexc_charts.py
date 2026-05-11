@@ -59,7 +59,7 @@ def update_dashboard(n_intervals, n_charts):
     xstocks_charts = []
     for symbol in XSTOCKS[:n_charts]:
         chart_df = df[df["symbol"] == symbol].sort_values("timestamp")
-        stock_symbol= chart_df["symbol"].str[:-5]
+        stock_symbol= chart_df["symbol"].iloc[0].str[:-5]
         
         if chart_df.empty: continue
 
