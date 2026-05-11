@@ -26,7 +26,7 @@ CARD_STYLE = {
 
 layout = dbc.Container([
     html.Div([
-        html.Div([
+     
             html.H2("MEXC xStocks", className="text-light fw-bold mb-0"),
             dcc.Interval(id='refresh', interval=60*1000), 
 
@@ -34,7 +34,7 @@ layout = dbc.Container([
                 value=12, clearable=False, searchable=False, style={"width": "120px"}),
             
             dbc.Row(id='xstocks-charts', className="g-3 mb-3"),
-        ], style=CARD_STYLE)
+       
     ])
 ], fluid=True)
 
