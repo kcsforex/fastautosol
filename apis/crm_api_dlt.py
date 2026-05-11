@@ -20,7 +20,7 @@ def tickets_resource(rows: list[dict]):
     for r in rows:
         yield r
 
-@router.get("/crm")
+@router.get("/")
 def generate_crm():
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
