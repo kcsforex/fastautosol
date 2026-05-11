@@ -67,7 +67,8 @@ def load_data_render(_):
 
     with sql_engine.connect() as conn:
         df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
-        df_daily = pd.read_sql("SELECT DISTINCT ON (departure_scheduled_ts, route_key) * FROM lufthansa ORDER BY departure_scheduled_ts, route_key, id DESC")     
+        df_daily = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
+            FROM lufthansa.flights ORDER BY departure_scheduled_ts, route_key, id DESC""")     
     if df.empty:
         return "No data", None, [], [], None
     if df_daily.empty:
@@ -103,31 +104,28 @@ def load_data_render(_):
     ], md=4) #className="d-flex"
 
     # 1. Daily Chart
-    daily = df.groupby(df_daily["departure_scheduled_ts"].dt.floor("D")).size().reset_index(name="count")
-    fig = px.bar(daily, x="departure_scheduled_ts", y="count", template="plotly_dark")
+    daily = df.groupby(df_daily["dep_sched_ts"].dt.floor("D")).size().reset_index(name="count")
+    fig = px.bar(daily, x="dep_sched_ts", y="count", template="plotly_dark")
     fig.update_layout(height=250,  plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=10, b=10))
+    mini_charts.append(make_card("Daily Chart", fig))
 
-    # 1 Delay dist
+    # 2 Delay dist
     df_delay_filtered = df[df["dep_delay_min"].notna() & (df["dep_delay_min"] <= 100)]
     mini_charts.append(make_card("Departure Delay Dist", px.histogram(df_delay_filtered, x="dep_delay_min", nbins=25, template="plotly_dark")))
 
-    # 2 Route delay
+    # 3 Route delay
     route = df.groupby("route_key")["dep_delay_min"].mean().reset_index()
     mini_charts.append(make_card("Top Delay Routes", px.bar(route.sort_values("dep_delay_min", ascending=False).head(15), x="route_key", y="dep_delay_min", template="plotly_dark")))
 
-    # 3 Airport traffic
+    # 4 Airport traffic
     airport = df["arrival__airport_code"].value_counts().head(15).reset_index()
     airport.columns = ["airport", "count"]
     mini_charts.append(make_card("Arrival Airports", px.bar(airport, x="airport", y="count", template="plotly_dark")))
 
-    # 4 Status
+    # 5 Status
     status = df["status__code"].value_counts().reset_index()
     status.columns = ["status", "count"]
     mini_charts.append(make_card("Status", px.pie(status, names="status", values="count", hole=0.4)))
-
-    # 5 Hour delay
-    hour = df.groupby("dep_hour")["dep_delay_min"].mean().reset_index()
-    mini_charts.append(make_card("Delay by Hour", px.line(hour, x="dep_hour", y="dep_delay_min", template="plotly_dark")))
 
     # 6 Aircraft
     aircraft = df["equipment__aircraft_code"].value_counts().reset_index()
