@@ -156,7 +156,6 @@ def load_data_render(_):
     # -----------------------------
     # CUSTOMER PARSING
     # -----------------------------
-
     spent_extract = df["customer"].str.extract(r'total_spent["\\\': ]+([0-9.]+)', expand=False)
     df["customer_total_spent"] = pd.to_numeric(spent_extract, errors="coerce").fillna(df["total_price"])
     orders_extract = df["customer"].str.extract( r'(?:orders_count|orders)["\\\': ]+([0-9]+)', expand=False)
@@ -174,62 +173,26 @@ def load_data_render(_):
     # -----------------------------
     # KPI
     # -----------------------------
-
     total_revenue = df["total_price"].sum()
-
-    spam_ratio = (
-        df["intent"] == "spam or irrelevant message"
-    ).mean()
-
+    spam_ratio = (df["intent"] == "spam or irrelevant message").mean()
     header_metrics = html.Div([
-        html.Span(
-            f"Revenue: ${total_revenue:,.0f}",
-            className="me-3"
-        ),
-        html.Span(
-            f"Spam Ratio: {spam_ratio:.2%}"
-        )
+        html.Span(f"Revenue: ${total_revenue:,.0f}", className="me-3"),
+        html.Span(f"Spam Ratio: {spam_ratio:.2%}")
     ], className="text-warning small")
 
     # -----------------------------
     # CHARTS
     # -----------------------------
-
     mini_charts = []
-
     def make_card(title, content, is_graph=True):
-
         if is_graph:
-            content.update_layout(
-                height=200,
-                margin=dict(l=10, r=10, t=15, b=15),
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                font=dict(color="white")
-            )
+            content.update_layout( height=200, margin=dict(l=10, r=10, t=15, b=15), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
 
         return dbc.Col([
             html.Div([
-                html.H6(
-                    title,
-                    className="mb-1",
-                    style={
-                        "color": "#f59e0b",
-                        "fontWeight": "500"
-                    }
-                ),
-
-                dcc.Graph(
-                    figure=content,
-                    config={'displayModeBar': False},
-                    style={"height": "200px"}
-                ) if is_graph else html.Div(
-                    content,
-                    style={
-                        "height": "200px",
-                        "overflowY": "auto"
-                    }
-                )
+                html.H6(title, className="mb-1", style={"color": "#f59e0b","fontWeight": "500"}),
+                dcc.Graph(figure=content, config={'displayModeBar': False}, style={"height": "200px"}) 
+                if is_graph else html.Div(content, style={ "height": "200px", "overflowY": "auto"})
             ], style=CARD_STYLE)
         ], md=4)
 
