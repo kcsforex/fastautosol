@@ -73,17 +73,17 @@ def load_data_render(_):
         return "No data", None, [], [], None
 
     # ---- parse dates (combine date + time columns) ----
-    df["dep_sched_dt"] = pd.to_datetime(df["departure__scheduled__date"] + " " + df["departure__scheduled__time"], errors="coerce")
-    df["dep_actual_dt"] = pd.to_datetime(df["departure__actual__date"] + " " + df["departure__actual__time"], errors="coerce")
-    df["arr_sched_dt"] = pd.to_datetime(df["arrival__scheduled__date"] + " " + df["arrival__scheduled__time"], errors="coerce")
-    df["arr_actual_dt"] = pd.to_datetime(df["arrival__actual__date"] + " " + df["arrival__actual__time"], errors="coerce")
+    df["dep_sched_ts"] = pd.to_datetime(df["departure__scheduled__date"] + " " + df["departure__scheduled__time"], errors="coerce")
+    df["dep_actual_ts"] = pd.to_datetime(df["departure__actual__date"] + " " + df["departure__actual__time"], errors="coerce")
+    df["arr_sched_ts"] = pd.to_datetime(df["arrival__scheduled__date"] + " " + df["arrival__scheduled__time"], errors="coerce")
+    df["arr_actual_ts"] = pd.to_datetime(df["arrival__actual__date"] + " " + df["arrival__actual__time"], errors="coerce")
     
     # ---- delays (safe) ----
-    df["dep_delay_min"] = (df["dep_actual_dt"] - df["dep_sched_dt"]).dt.total_seconds() / 60
-    df["arr_delay_min"] = (df["arr_actual_dt"] - df["arr_sched_dt"]).dt.total_seconds() / 60
+    df["dep_delay_min"] = (df["dep_actual_ts"] - df["dep_sched_ts"]).dt.total_seconds() / 60
+    df["arr_delay_min"] = (df["arr_actual_ts"] - df["arr_sched_ts"]).dt.total_seconds() / 60
     
     # ---- hour ----
-    df["dep_hour"] = df["dep_sched_dt"].dt.hour
+    df["dep_hour"] = df["dep_sched_ts"].dt.hour
     df["_ingested_at"] = pd.to_datetime(df["_ingested_at"]).dt.strftime("%Y-%m-%d %H:%M:%S")
 
     # -------------------
