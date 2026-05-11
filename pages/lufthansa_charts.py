@@ -1,4 +1,4 @@
-# 2026.05.05  15.00
+# 2026.05.10  12.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -104,8 +104,8 @@ def load_data_render(_):
     ], md=4) #className="d-flex"
 
     # 1. Daily Chart
-    daily = df.groupby(df_daily["dep__sched__ts"].dt.floor("D")).size().reset_index(name="count")
-    fig = px.bar(daily, x="dep__sched__ts", y="count", template="plotly_dark")
+    daily_df = df.groupby(df_daily["dep__sched__ts"].dt.floor("D")).size().reset_index(name="count")
+    fig = px.bar(daily_df, x="dep__sched__ts", y="count", template="plotly_dark")
     fig.update_layout(height=250,  plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=10, b=10))
     mini_charts.append(make_card("Daily Chart", fig))
 
