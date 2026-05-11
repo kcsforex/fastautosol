@@ -34,7 +34,7 @@ layout = dbc.Container([
             dcc.Dropdown(id="chart-count", options=[{"label": str(i), "value": i} for i in [8,12,16,20,24,28,32]],
                 value=12, clearable=False, searchable=False, style={"width": "120px"}),
 
-             html.Div(html.Hr()),
+             html.Hr(),
             
             dbc.Row(id='xstocks-charts', className="g-3 mb-3"),
        
