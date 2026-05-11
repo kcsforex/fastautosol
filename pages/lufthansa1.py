@@ -66,10 +66,12 @@ layout = dbc.Container([
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-        df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)
-
+        df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
+        df_daily = pd.read_sql("SELECT DISTINCT ON (departure_scheduled_ts, route_key) * FROM lufthansa ORDER BY departure_scheduled_ts, route_key, id DESC")     
     if df.empty:
         return "No data", None, [], [], None
+    if df_daily.empty:
+        return "No data"
 
     # ---- parse dates (combine date + time columns) ----
     df["dep_sched_dt"] = pd.to_datetime(df["departure__scheduled__date"] + " " + df["departure__scheduled__time"], errors="coerce")
@@ -99,6 +101,11 @@ def load_data_render(_):
             if is_graph else html.Div(content, style={"height": "200px", "overflowY": "auto"})
         ], style=CARD_STYLE)
     ], md=4) #className="d-flex"
+
+    # 1. Daily Chart
+    daily = df.groupby(df_daily["departure_scheduled_ts"].dt.floor("D")).size().reset_index(name="count")
+    fig = px.bar(daily, x="departure_scheduled_ts", y="count", template="plotly_dark")
+    fig.update_layout(height=250,  plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=10, b=10))
 
     # 1 Delay dist
     df_delay_filtered = df[df["dep_delay_min"].notna() & (df["dep_delay_min"] <= 100)]
