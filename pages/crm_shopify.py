@@ -150,32 +150,75 @@ def load_data_render(_):
 
     df = df.copy()
 
-    # 1. Fix Timestamp for "Tickets Over Time"
+    # -----------------------------
+    # DATA CLEANING
+    # -----------------------------
+    
+    # timestamps
     df["created_at"] = pd.to_datetime(df["created_at"], errors="coerce")
     df = df.dropna(subset=["created_at"])
     
-    # Floor to 'D' (Day) so the chart groups by date, not millisecond
-    df["day"] = df["created_at"].dt.floor('D') 
-    df["total_price"] = pd.to_numeric(df["total_price"], errors="coerce").fillna(0) 
+    df["day"] = df["created_at"].dt.date
+    df["hour"] = df["created_at"].dt.hour
     
-    # 2. Fix Regex for Customer Data
-    # Extract total_spent (Numbers and decimals)
-    df["customer_total_spent"] = df["customer"].str.extract(r'total_spent:([\d.]+)').astype(float).fillna(0)
+    # numeric
+    df["total_price"] = pd.to_numeric(df["total_price"], errors="coerce").fillna(0)
     
-    # Extract orders_count (Numbers)
-    df["customer_orders"] = df["customer"].str.extract(r'orders_count:(\d+)').astype(float).fillna(0)
+    # text cleanup
+    for col in ["intent", "financial_status", "customer"]:
+        if col in df.columns:
+            df[col] = df[col].fillna("").astype(str
 
-    # Extract country (Letters - corrected regex)
-    df["customer_country"] = df["customer"].str.extract(r'country:([A-Z]{2,})').fillna('NA')    
+    # -----------------------------
+    # CUSTOMER PARSING
+    # -----------------------------
     
-    # Extract email (Standard email characters - corrected regex)
-    df["customer_email"] = df["customer"].str.extract(r'email:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})').fillna('Anonymous') 
+    spent_extract = df["customer"].str.extract(
+        r'total_spent["\': ]+([0-9.]+)',
+        expand=False
+    )
+    
+    df["customer_total_spent"] = pd.to_numeric(
+        spent_extract,
+        errors="coerce"
+    ).fillna(df["total_price"])
+    
+    # orders count
+    orders_extract = df["customer"].str.extract(
+        r'(?:orders_count|orders)["\': ]+([0-9]+)',
+        expand=False
+    )
 
-    # 3. Basic cleaning
-    df["hour"] = df["created_at"].dt.hour.fillna(0)    
-    df["intent"] = df["intent"].fillna("unknown")
-    df["financial_status"] = df["financial_status"].fillna("unknown")
-    df["processed"] = df["processed"].fillna(False)
+    df["customer_orders"] = pd.to_numeric(
+    orders_extract,
+    errors="coerce"
+    ).fillna(1)
+    
+    # country
+    country_extract = df["customer"].str.extract(
+        r'country["\': ]+([A-Za-z]{2,})',
+        expand=False
+    )
+    
+    df["customer_country"] = (
+        country_extract
+        .fillna("Unknown")
+        .replace("", "Unknown")
+    )
+
+    # email
+    email_extract = df["customer"].str.extract(
+        r'([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})',
+        expand=False
+    )
+    
+    df["customer_email"] = (
+        email_extract
+        .fillna("Anonymous")
+        .replace("", "Anonymous")
+    )
+
+    
 
     # ---- KPIs ----
     total_revenue = df["total_price"].sum()
