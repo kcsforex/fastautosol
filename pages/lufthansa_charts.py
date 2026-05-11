@@ -68,7 +68,7 @@ def load_data_render(_):
     with sql_engine.connect() as conn:
         df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
         df_daily = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
-            FROM lufthansa.flights ORDER BY departure_scheduled_ts, route_key, id DESC""")     
+            FROM lufthansa.flights ORDER BY departure__scheduled__date, departure__scheduled__time, route_key, id DESC""")     
     if df.empty:
         return "No data", None, [], [], None
     if df_daily.empty:
