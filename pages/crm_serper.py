@@ -132,6 +132,18 @@ def load_data_render(_):
 
     # 6 Avg Rating by Category
     avg_rating_df = df.groupby("category")["rating"].mean().dropna().sort_values(ascending=False).head(15).reset_index() 
+
+    fig.update_layout(
+    xaxis=dict(
+        tickmode="array",
+        tickvals=avg_rating_df["category"],
+        ticktext=[
+            label[:max_len] + "…" if len(label) > max_len else label
+            for label in avg_rating_df["category"]
+        ]
+    )
+)
+    
     avg_rating_df["category"] = avg_rating_df["category"].apply(lambda x: str(x)[:12] + "..." if len(str(x)) > 12 else str(x)) 
     mini_charts.append(make_card("Avg Rating by Category", px.bar(avg_rating_df, x="category", y="rating", template="plotly_dark")))
  
