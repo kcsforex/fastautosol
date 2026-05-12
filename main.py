@@ -1,4 +1,4 @@
-# 2026.05.11  14.00
+# 2026.05.12  9.00
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -10,7 +10,7 @@ import asyncio
 import apis.crm_shopify_api as crm_shopify_api
 import apis.bybit_api as bybit
 import apis.kraken_api as kraken
-import apis.lufthansa_api as lufthansa
+import apis.lufthansa_api as lufthansa_api
 import apis.serper_places_api as serper_places
 import apis.serper_places_api_email as serper_places_email
 import apis.movies_api_dlt as movies_dlt
@@ -32,7 +32,7 @@ server.mount("/youtube", youtube.mcp.streamable_http_app())
 server.include_router(crm_shopify_api.router, prefix="/api/crm_shopify",   tags=["CRM Shopify"])
 server.include_router(bybit.router,         prefix="/api/bybit",         tags=["Bybit"])
 server.include_router(kraken.router,        prefix="/api/kraken",        tags=["Kraken"])
-server.include_router(lufthansa.router,     prefix="/api/lufthansa",     tags=["Lufthansa"])
+server.include_router(lufthansa_api.router,     prefix="/api/lufthansa",     tags=["Lufthansa"])
 server.include_router(serper_places.router, prefix="/api/serper",        tags=["Serper Places"])
 server.include_router(serper_places_email.router, prefix="/api/serper_email",        tags=["Serper Places Email"])
 server.include_router(movies_dlt.router,    prefix="/api/movies_dlt",    tags=["Movies DLT"])
