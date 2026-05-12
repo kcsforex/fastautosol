@@ -1,4 +1,4 @@
-# 2026.05.10  18.00
+# 2026.05.12  16.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -126,27 +126,16 @@ def load_data_render(_):
     fig = px.pie(email_stats, names="type", values="count", hole=0.4, template="plotly_dark")
     fig.update_traces(textinfo="percent+value", textposition="inside")
     mini_charts.append(make_card("Email Coverage", fig))
-       
-    #email_stats = pd.DataFrame({"type": ["Has Email", "No Email"], "count": [df["email"].astype(bool).sum(), (~df["email"].astype(bool)).sum()]})
-    #mini_charts.append(make_card("Email Coverage", px.pie(email_stats, names="type", values="count", hole=0.4)))
 
     # 6 Avg Rating by Category
     avg_rating_df = df.groupby("category")["rating"].mean().dropna().sort_values(ascending=False).head(15).reset_index() 
-
-    fig.update_layout(
-    xaxis=dict(
+    fig = px.bar(avg_rating_df, x="category", y="rating", template="plotly_dark"
+    fig.update_layout(xaxis=dict(
         tickmode="array",
         tickvals=avg_rating_df["category"],
-        ticktext=[
-            label[:max_len] + "…" if len(label) > max_len else label
-            for label in avg_rating_df["category"]
-        ]
-    )
-)
+        ticktext=[label[:15] + "…" if len(label) > 15 else label for label in avg_rating_df["category"]]))
+    mini_charts.append(make_card("Avg Rating by Category", fig))
     
-    avg_rating_df["category"] = avg_rating_df["category"].apply(lambda x: str(x)[:12] + "..." if len(str(x)) > 12 else str(x)) 
-    mini_charts.append(make_card("Avg Rating by Category", px.bar(avg_rating_df, x="category", y="rating", template="plotly_dark")))
- 
     # -------------------
     # MINI TABLES
     # -------------------
