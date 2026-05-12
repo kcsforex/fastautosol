@@ -144,8 +144,8 @@ def load_data_render(_):
     # LOG TABLE
     # -------------------
     #table = dbc.Table.from_dataframe(df.tail(100), striped=False, borderless=True, className="text-light small")
-    status_cols = ["route_key", "status__description", "equipment__aircraft_code", "dep_act_ts", "arr_act_ts"]
-    table = dbc.Table.from_dataframe(df.loc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
+    status_cols = [0,4,5,6,7,10,11]
+    table = dbc.Table.from_dataframe(df.iloc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
         className="text-light m-0", style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
     return f"Updated → {df['_ingested_at'].iloc[-1]}", df.to_dict("records"), mini_charts, mini_tables, table
