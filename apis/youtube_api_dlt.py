@@ -1,4 +1,4 @@
-# 2026.04.27  11.00
+# 2026.05.12  18.00
 from fastapi import FastAPI, APIRouter, Query
 from pydantic import BaseModel, Field, field_validator
 from typing import List
@@ -14,7 +14,7 @@ from datetime import datetime
 import json
 
 # --- CONFIG ---
-API_KEY = "AIzaSyBzSaapBAb9sfTih5iHefzDeYOtKB8_G7s"
+YOUTUBE_KEY = os.getenv("YOUTUBE_API_KEY")
 BASE_URL = "https://www.googleapis.com/youtube/v3"
 semaphore = asyncio.Semaphore(5)
 router = APIRouter()
@@ -125,6 +125,8 @@ async def fetch_single_channel(session, channel, maxVideos, maxComments):
             video_id = video["id"]
             stats = video["statistics"]
             snippet = video["snippet"]
+            description = snippet.get("description", "")
+            links = re.findall(r'(https?://\S+)', description)
             details = video["contentDetails"]
             duration_sec = int(isodate.parse_duration(details["duration"]).total_seconds())
 
@@ -144,6 +146,8 @@ async def fetch_single_channel(session, channel, maxVideos, maxComments):
                 "channel_name": ch_item["snippet"]["title"],
                 "video_id": video_id,
                 "title": snippet["title"][:75],
+                "description_snippet": description[:200],
+                "has_store_link": any("shopify" in link or "store" in link for link in links),     
                 "duration_sec": duration_sec,
                 "upload_date": snippet["publishedAt"],
                 "view_count": int(stats.get("viewCount", 0)),
