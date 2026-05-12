@@ -108,7 +108,7 @@ async def get_flightroute_details(flight_date: str):
         clean_data.append(filtered)
     
     # --------------------------------------------------------------------------------------------------
-    pipeline = dlt.pipeline(pipeline_name="lufthansa", 
+    pipeline = dlt.pipeline(pipeline_name="lufthansa_ingest", 
                             destination=dlt.destinations.postgres(credentials=DB_CONFIG), 
                             dataset_name="bronze")
     try:
