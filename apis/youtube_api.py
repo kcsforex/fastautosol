@@ -3,8 +3,6 @@ from fastapi import FastAPI, APIRouter, Query
 from pydantic import BaseModel, Field, field_validator
 from typing import List
 from contextlib import asynccontextmanager
-from mcp.server.fastmcp import FastMCP
-from mcp.server.transport_security import TransportSecuritySettings
 import aiohttp
 import asyncio
 import isodate
@@ -20,16 +18,7 @@ BASE_URL = "https://www.googleapis.com/youtube/v3"
 semaphore = asyncio.Semaphore(5)
 router = APIRouter()
 
-DB_CONFIG = {
-    "host": "postgresql",
-    "port": 5432,
-    "database": "n8n",
-    "username": "sql_admin",
-    "password": "sql_pass",
-    "connect_timeout": 15
-}
-
-mcp = FastMCP("YouTube Analytics", stateless_http=True, transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False))
+DB_CONFIG = {"host": "postgresql", "port": 5432, "database": "n8n", "username": "sql_admin", "password": "sql_pass", "connect_timeout": 15}
 
 # --- PYDANTIC MODEL ---
 class YouTubeRequest(BaseModel):
