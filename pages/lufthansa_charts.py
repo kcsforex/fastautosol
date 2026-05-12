@@ -1,4 +1,4 @@
-# 2026.05.11  14.00
+# 2026.05.12  9.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -66,7 +66,7 @@ layout = dbc.Container([
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-        #df = pd.read_sql("SELECT * FROM lufthansa.flights", conn)               
+        #df = pd.read_sql("SELECT * FROM bronze.lh_flights", conn)               
         df = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
             FROM lufthansa.flights ORDER BY departure__scheduled__date, departure__scheduled__time, route_key DESC""", conn)     
     if df.empty:
