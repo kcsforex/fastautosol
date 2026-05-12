@@ -1,4 +1,4 @@
-# 2026.05.12  14.00
+# 2026.05.12  15.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -144,7 +144,7 @@ def load_data_render(_):
     # LOG TABLE
     # -------------------
     #table = dbc.Table.from_dataframe(df.tail(100), striped=False, borderless=True, className="text-light small")
-    status_cols = ["route_key", "status__description", "equipment__aircraft_code", "departure_actual_ts", "arrival_actual_ts"]
+    status_cols = ["route_key", "status__description", "equipment__aircraft_code", "departure_act_ts", "arrival_act_ts"]
     table = dbc.Table.from_dataframe(df.loc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
         className="text-light m-0", style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
