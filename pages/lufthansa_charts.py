@@ -94,8 +94,8 @@ def load_data_render(_):
     ], md=4) #className="d-flex"
 
     # 1. Daily Chart
-    daily_df = df.groupby(df["dep_sched_ts"].dt.floor("D")).size().reset_index(name="count")
-    fig = px.bar(daily_df, x="dep_sched_ts", y="count", template="plotly_dark")
+    daily_df = df.groupby(df["dep_sch_ts"].dt.floor("D")).size().reset_index(name="count")
+    fig = px.bar(daily_df, x="dep_sch_ts", y="count", template="plotly_dark")
     fig.update_layout(height=250,  plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=20, r=20, t=10, b=10))
     mini_charts.append(make_card("Daily Chart", fig))
 
@@ -144,7 +144,7 @@ def load_data_render(_):
     # LOG TABLE
     # -------------------
     #table = dbc.Table.from_dataframe(df.tail(100), striped=False, borderless=True, className="text-light small")
-    status_cols = ["route_key", "status__description", "departure__actual__date", "departure__actual__time", "arrival__actual__date", "arrival__actual__time"]
+    status_cols = ["route_key", "status__description", "equipment__aircraft_code", "departure_actual_ts", "arrival_actual_ts"]
     table = dbc.Table.from_dataframe(df.loc[-100:, status_cols], striped=False, hover=True, responsive=True, borderless=True,
         className="text-light m-0", style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
