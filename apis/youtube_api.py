@@ -38,7 +38,7 @@ class YouTubeRequest(BaseModel):
 
 # --- GENERIC YT REQUEST ---
 async def yt_get(session, endpoint, params):
-    params["key"] = API_KEY
+    params["key"] = YOUTUBE_KEY
     async with semaphore:
         async with session.get(f"{BASE_URL}/{endpoint}", params=params) as resp:
             if resp.status != 200:
