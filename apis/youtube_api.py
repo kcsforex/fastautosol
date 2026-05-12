@@ -10,6 +10,7 @@ import dlt
 from dlt.pipeline.exceptions import PipelineStepFailed
 from datetime import datetime
 import json
+import re
 import os
 
 # --- CONFIG ---
