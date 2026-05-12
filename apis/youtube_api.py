@@ -12,6 +12,7 @@ import dlt
 from dlt.pipeline.exceptions import PipelineStepFailed
 from datetime import datetime
 import json
+import os
 
 # --- CONFIG ---
 YOUTUBE_KEY = os.getenv("YOUTUBE_API_KEY")
