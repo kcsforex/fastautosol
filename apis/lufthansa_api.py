@@ -1,4 +1,4 @@
-# 2026.05.08  17.00
+# 2026.05.12  9.00
 import os
 import httpx
 import asyncio
@@ -55,7 +55,7 @@ async def fetch_route(client, token, origin, dest, flight_date, sem):
         except Exception:
             return []
 
-@dlt.resource(name="flights") #max_table_nesting=0
+@dlt.resource(name="lh_flights") #max_table_nesting=0
 def flights_resource(rows: list[dict]):
     for r in rows:
         yield r
@@ -113,7 +113,7 @@ async def get_flightroute_details(flight_date: str):
     pipeline = dlt.pipeline(
         pipeline_name="lufthansa", 
         destination=dlt.destinations.postgres(credentials=DB_CONFIG), 
-        dataset_name="lufthansa")
+        dataset_name="bronze")
     
     try:
         load_info = pipeline.run(flights_resource(clean_data), write_disposition="merge", 
