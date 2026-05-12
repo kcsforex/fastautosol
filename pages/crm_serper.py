@@ -129,7 +129,7 @@ def load_data_render(_):
 
     # 6 Avg Rating by Category
     avg_rating_df = df.groupby("category")["rating"].mean().dropna().sort_values(ascending=False).head(15).reset_index() 
-    fig = px.bar(avg_rating_df, x="category", y="rating", template="plotly_dark"
+    fig = px.bar(avg_rating_df, x="category", y="rating", template="plotly_dark")
     fig.update_layout(xaxis=dict(
         tickmode="array",
         tickvals=avg_rating_df["category"],
