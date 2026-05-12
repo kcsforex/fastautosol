@@ -73,19 +73,18 @@ async def get_youtube_metrics_api(req: YouTubeRequest):
         row["_ingested_at"] = datetime.utcnow().isoformat()
 
     pipeline = dlt.pipeline(
-        pipeline_name="youtube",
+        pipeline_name="youtube_ingest",
         destination=dlt.destinations.postgres(credentials=DB_CONFIG),
-        dataset_name="youtube")
-    pipeline.drop_pending_packages()
+        dataset_name="bronze")
 
     try:
-        load_info = pipeline.run(youtube_resource(data), write_disposition="append")
+        load_info = pipeline.run(youtube_resource(data), write_disposition="replace")
 
     except PipelineStepFailed as e:
         msg = str(e).lower()
-        if e.step == "load" and "does not exist" in msg and "relation" in msg:
+        if e.step == "load" or "does not exist" in msg and "relation" in msg:
             pipeline.drop_pending_packages()
-            load_info = pipeline.run(youtube_resource(data), write_disposition="replace")
+            load_info = pipeline.run(youtube_resource(data), write_disposition="append")
         else:
             raise
 
