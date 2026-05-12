@@ -24,8 +24,7 @@ app = dash.Dash(__name__, use_pages=True, suppress_callback_exceptions=True, # c
 from pages import home, bybit_ccharts, bybit_lcharts, crm_serper, crm_shopify, mexc_charts, mcp, lufthansa_charts
 
 # ----- 3. FASTAPI WRAPPER -----
-server = FastAPI(title="Dash Main App", lifespan=lambda app: youtube.mcp.session_manager.run())
-server.mount("/youtube", youtube.mcp.streamable_http_app())
+server = FastAPI(title="Dash Main App")
 
 # ----- 4. API ROUTERS -----
 server.include_router(crm_shopify_api.router, prefix="/api/crm_shopify",   tags=["CRM Shopify"])
