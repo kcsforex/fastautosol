@@ -99,7 +99,7 @@ async def fetch_single_channel(session, channel, maxVideos, maxComments):
 
         ch_data = await yt_get(session, "channels", {"part": "id,snippet,statistics,contentDetails", "forHandle": channel})
         if not ch_data.get("items"):
-            return [{"channel": channel, "error": "Channel not found"}]
+            return [{"channel_name": channel, "video_id": "ERROR", "error": str(e)}]
         ch_item = ch_data["items"][0]
         playlist_id = ch_item["contentDetails"]["relatedPlaylists"]["uploads"]
 
@@ -132,6 +132,7 @@ async def fetch_single_channel(session, channel, maxVideos, maxComments):
                     comments.append({"c_id": None, "c_author": None, "c_published": None, "c_text": f"[error: {str(e)[:100]}]", "c_like_count": 0})
 
             results.append({
+                "error": None,
                 "channel_name": ch_item["snippet"]["title"],
                 "video_id": video_id,
                 "title": snippet["title"][:75],
