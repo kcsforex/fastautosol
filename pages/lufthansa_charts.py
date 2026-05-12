@@ -1,4 +1,4 @@
-# 2026.05.12  9.00
+# 2026.05.12  14.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -66,24 +66,16 @@ layout = dbc.Container([
 def load_data_render(_):
 
     with sql_engine.connect() as conn:
-        #df = pd.read_sql("SELECT * FROM bronze.lh_flights", conn)               
-        df = pd.read_sql("""SELECT DISTINCT ON (route_key, departure__scheduled__date, departure__scheduled__time) * 
-            FROM lufthansa.flights ORDER BY departure__scheduled__date, departure__scheduled__time, route_key DESC""", conn)     
+        df = pd.read_sql("SELECT * FROM silver.lh_flights", conn)               
     if df.empty:
         return "No data", None, [], [], None
-
-    # ---- parse dates (combine date + time columns) ----
-    df["dep_sched_ts"] = pd.to_datetime(df["departure__scheduled__date"] + " " + df["departure__scheduled__time"], errors="coerce")
-    df["dep_actual_ts"] = pd.to_datetime(df["departure__actual__date"] + " " + df["departure__actual__time"], errors="coerce")
-    df["arr_sched_ts"] = pd.to_datetime(df["arrival__scheduled__date"] + " " + df["arrival__scheduled__time"], errors="coerce")
-    df["arr_actual_ts"] = pd.to_datetime(df["arrival__actual__date"] + " " + df["arrival__actual__time"], errors="coerce")
     
     # ---- delays (safe) ----
-    df["dep_delay_min"] = (df["dep_actual_ts"] - df["dep_sched_ts"]).dt.total_seconds() / 60
-    df["arr_delay_min"] = (df["arr_actual_ts"] - df["arr_sched_ts"]).dt.total_seconds() / 60
+    df["dep_delay_min"] = (df["dep_act_ts"] - df["dep_sch_ts"]).dt.total_seconds() / 60
+    df["arr_delay_min"] = (df["arr_act_ts"] - df["arr_sch_ts"]).dt.total_seconds() / 60
     
     # ---- hour ----
-    df["dep_hour"] = df["dep_sched_ts"].dt.hour
+    df["dep_hour"] = df["dep_sch_ts"].dt.hour
     df["_ingested_at"] = pd.to_datetime(df["_ingested_at"]).dt.strftime("%Y-%m-%d %H:%M:%S")
 
     # -------------------
