@@ -57,12 +57,12 @@ async def yt_get(session, endpoint, params):
             return await resp.json()
 
 
-@dlt.resource(name="youtube_metrics", max_table_nesting=0) #columns={ "comments": {"data_type": "json"}}
+@dlt.resource(name="youtube_metrics", max_table_nesting=0)
 def youtube_resource(rows: list[dict]):
     for r in rows:
         yield r
 
-@router.post("/metrics")
+@router.post("/")
 async def get_youtube_metrics_api(req: YouTubeRequest):
 
     data = await fetch_youtube_multich(req.channels, req.maxVideos, req.maxComments)
@@ -80,9 +80,8 @@ async def get_youtube_metrics_api(req: YouTubeRequest):
     try:
         load_info = pipeline.run(youtube_resource(data), write_disposition="replace")
 
-    except PipelineStepFailed as e:
-        msg = str(e).lower()
-        if e.step == "load" or "does not exist" in msg and "relation" in msg:
+    except PipelineStepFailed as e: 
+        if e.step == "load" or "does not exist" in str(e).lower() :
             pipeline.drop_pending_packages()
             load_info = pipeline.run(youtube_resource(data), write_disposition="append")
         else:
@@ -95,7 +94,7 @@ async def get_youtube_metrics_api(req: YouTubeRequest):
     return {"rows_loaded": len(data), "status": "loaded", "load_info": str(load_info), "sample": data[:5]}
 
 
-# --- MULTI FETCH ---
+# --------- MULTI FETCH ---------
 async def fetch_youtube_multich(channels, maxVideos, maxComments):
     timeout = aiohttp.ClientTimeout(total=60)
     async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -103,7 +102,7 @@ async def fetch_youtube_multich(channels, maxVideos, maxComments):
         results = await asyncio.gather(*tasks)
         return [item for sublist in results for item in sublist]
 
-# --- SINGLE CHANNEL ---
+# --------- SINGLE CHANNEL ---------
 async def fetch_single_channel(session, channel, maxVideos, maxComments):
     try:
 
