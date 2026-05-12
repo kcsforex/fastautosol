@@ -1,4 +1,4 @@
-# 2026.05.12  9.00
+# 2026.05.12  18.00
 import dash
 from dash import html, dcc
 import dash_bootstrap_components as dbc
@@ -14,8 +14,7 @@ import apis.lufthansa_api as lufthansa_api
 import apis.serper_places_api as serper_places
 import apis.serper_places_api_email as serper_places_email
 import apis.movies_api_dlt as movies_dlt
-import apis.youtube_api as youtube
-import apis.youtube_api_dlt as youtube_dlt
+import apis.youtube_api as youtube_api
 
 # ----- 1. Initalize Dash -----
 app = dash.Dash(__name__, use_pages=True, suppress_callback_exceptions=True, # compress=True
@@ -36,8 +35,7 @@ server.include_router(lufthansa_api.router,     prefix="/api/lufthansa",     tag
 server.include_router(serper_places.router, prefix="/api/serper",        tags=["Serper Places"])
 server.include_router(serper_places_email.router, prefix="/api/serper_email",        tags=["Serper Places Email"])
 server.include_router(movies_dlt.router,    prefix="/api/movies_dlt",    tags=["Movies DLT"])
-server.include_router(youtube.router,       prefix="/api/youtube",       tags=["Youtube Single/Multi Channel"])
-server.include_router(youtube_dlt.router,   prefix="/api/youtube_dlt",   tags=["Youtube Single/Multi Channel DLT"])
+server.include_router(youtube_api.router,       prefix="/api/youtube",       tags=["Youtube Single/Multi Channel"])
 
 # ----- 5. HEALTH ENDPOINT -----
 @server.get("/health")
