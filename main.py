@@ -18,7 +18,7 @@ import apis.youtube_api as youtube_api
 
 # ----- 1. Initalize Dash -----
 app = dash.Dash(__name__, use_pages=True, suppress_callback_exceptions=True, # compress=True
-    external_stylesheets=[dbc.themes.DARKLY, "https://use.fontawesome.com/releases/v5.15.4/css/all.css"])
+    external_stylesheets=[dbc.themes.DARKLY, ""https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"])
 
 # ----- 2. NOW IMPORT YOUR PAGES -----
 from pages import home, bybit_ccharts, bybit_lcharts, crm_serper, crm_shopify, mexc_charts, mcp, lufthansa_charts, youtube_charts
