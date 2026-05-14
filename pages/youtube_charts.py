@@ -84,23 +84,12 @@ layout = dbc.Container([
     # COMMENT LOG
     html.Div([
 
-        html.H5(
-            "Latest Comments",
-            className="mb-2",
-            style={
-                "color": "#ef4444",
-                "fontWeight": "500"
-            }
-        ),
+        html.H5( "Latest Comments", className="text-success mb-2",
+            style={ "color": "#ef4444", "fontWeight": "500"}),
 
         html.Div(
             id=f"{DASH_ID_TAG}-log-table",
-            style={
-                "height": "350px",
-                "overflowY": "auto",
-                "fontSize": "12px"
-            }
-        )
+            style={"height": "350px", "overflowY": "auto",  "fontSize": "12px"})
 
     ], style=CARD_STYLE)
 
@@ -125,25 +114,9 @@ def make_card(title, content, is_graph=True, md_col=3):
 
         html.Div([
 
-            html.H6(
-                title, className="text-success mb-2",
-                style={
-                    "color": "#ef4444",
-                    "fontWeight": "500"
-                }
-            ),
-
-            dcc.Graph(
-                figure=content,
-                config={"displayModeBar": False},
-                style={"height": "240px"}
-            ) if is_graph else html.Div(
-                content,
-                style={
-                    "height": "240px",
-                    "overflowY": "auto"
-                }
-            )
+            html.H6(title, className="text-success mb-2", style={ "color": "#ef4444", "fontWeight": "500"} ),
+            dcc.Graph( figure=content, config={"displayModeBar": False}, style={"height": "240px"})
+            if is_graph else html.Div(content, style={ "height": "240px", "overflowY": "auto"})
 
         ], style=CARD_STYLE)
 
