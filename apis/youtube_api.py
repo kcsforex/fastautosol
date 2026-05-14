@@ -1,4 +1,4 @@
-# 2026.05.12  18.00
+# 2026.05.14  18.00
 from fastapi import FastAPI, APIRouter, Query
 from pydantic import BaseModel, Field, field_validator
 from typing import List
@@ -69,10 +69,12 @@ async def get_youtube_metrics_api(req: YouTubeRequest):
         dataset_name="bronze")
 
     try:
-        load_info = pipeline.run(youtube_resource(data), write_disposition="merge", primary_key="video_id")
+        load_info = pipeline.run(youtube_resource(data),  
+            write_disposition={"disposition": "merge", "strategy": "upsert"}                    
+            primary_key="video_id")
 
     except PipelineStepFailed as e: 
-        if e.step == "load" or e.step == "normalize" or "does not exist" in str(e).lower() :
+        if (e.step in ["load", "normalize"] or "does not exist" in str(e).lower()):
             pipeline.drop_pending_packages()
             load_info = pipeline.run(youtube_resource(data), write_disposition="append")
         else:
