@@ -147,59 +147,17 @@ def load_youtube_data(_):
     # -------------------------------------------------
 
     # Top videos
-    top_videos = (
-        df[[
-            "channel",
-            "title",
-            "view_count",
-            "like_count",
-            "comment_count"
-        ]]
-        .sort_values("view_count", ascending=False)
-        .head(15)
-    )
-
-    top_videos["title"] = top_videos["title"].apply(
-        lambda x: str(x)[:55] + "..."
-        if len(str(x)) > 55 else str(x)
-    )
+    top_videos = (df[["channel", "title", "view_count", "like_count", "comment_count"]].sort_values("view_count", ascending=False).head(15))
+    top_videos["title"] = top_videos["title"].apply(lambda x: str(x)[:55] + "..." if len(str(x)) > 55 else str(x))
 
     # Best engagement
-    best_eng = (
-        df[[
-            "channel",
-            "title",
-            "engagement_rate",
-            "view_count"
-        ]]
-        .sort_values("engagement_rate", ascending=False)
-        .head(15)
-    )
-
-    best_eng["engagement_rate"] = best_eng[
-        "engagement_rate"
-    ].round(2)
-
-    best_eng["title"] = best_eng["title"].apply(
-        lambda x: str(x)[:55] + "..."
-        if len(str(x)) > 55 else str(x)
-    )
+    best_eng = (df[["channel", "title", "engagement_rate", "view_count"]].sort_values("engagement_rate", ascending=False).head(15))
+    best_eng["engagement_rate"] = best_eng["engagement_rate"].round(2)
+    best_eng["title"] = best_eng["title"].apply(lambda x: str(x)[:55] + "..." if len(str(x)) > 55 else str(x))
 
     mini_tables = [
-
-        make_card(
-            "Top Videos",
-            make_table(top_videos),
-            is_graph=False,
-            md_col=6
-        ),
-
-        make_card(
-            "Best Engagement",
-            make_table(best_eng),
-            is_graph=False,
-            md_col=6
-        )
+        make_card("Top Videos", make_table(top_videos), is_graph=False, md_col=6),
+        make_card("Best Engagement", make_table(best_eng), is_graph=False, md_col=6)
     ]
 
     # -------------------------------------------------
@@ -207,18 +165,14 @@ def load_youtube_data(_):
     # -------------------------------------------------
 
     comment_rows = []
-
     for _, row in df.iterrows():
-
+        
         comments = row.get("comments")
-
         if not comments:
             continue
 
         if isinstance(comments, list):
-
             for c in comments:
-
                 comment_rows.append({
                     "channel": row["channel"],
                     "video": str(row["title"])[:45],
@@ -232,38 +186,11 @@ def load_youtube_data(_):
 
     if not comments_df.empty:
 
-        comments_df["published"] = pd.to_datetime(
-            comments_df["published"],
-            errors="coerce"
-        )
+        comments_df["published"] = pd.to_datetime(comments_df["published"], errors="coerce")
+        comments_df = comments_df.sort_values("published", ascending=False).head(150)
+        comments_df["published"] = comments_df["published"].dt.strftime("%Y-%m-%d %H:%M")
 
-        comments_df = comments_df \
-            .sort_values("published", ascending=False) \
-            .head(150)
+    log_table = dbc.Table.from_dataframe(comments_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light text-success small",
+        style={"backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white", "fontSize": "11px"})
 
-        comments_df["published"] = comments_df[
-            "published"
-        ].dt.strftime("%Y-%m-%d %H:%M")
-
-    log_table = dbc.Table.from_dataframe(
-        comments_df,
-        striped=False,
-        hover=True,
-        responsive=True,
-        borderless=True,
-        className="text-light text-success small",
-        style={
-            "backgroundColor": "transparent",
-            "--bs-table-bg": "transparent",
-            "--bs-table-accent-bg": "transparent",
-            "color": "white",
-            "fontSize": "11px"
-        }
-    )
-
-    return (
-        df.to_dict("records"),
-        mini_charts,
-        mini_tables,
-        log_table
-    )
+    return df.to_dict("records"), mini_charts, mini_tables, log_table
