@@ -126,8 +126,7 @@ def make_card(title, content, is_graph=True, md_col=3):
         html.Div([
 
             html.H6(
-                title,
-                className="mb-2",
+                title, className="text-success mb-2,
                 style={
                     "color": "#ef4444",
                     "fontWeight": "500"
