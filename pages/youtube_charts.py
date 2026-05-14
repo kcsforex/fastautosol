@@ -119,7 +119,6 @@ def load_youtube_data(_):
 
     df = df.sort_values("_ingested_at").drop_duplicates(subset=["video_id"], keep="last")
 
-    # engagement ratio
     df["engagement_rate"] = ((df["like_count"] + df["comment_count"]) / df["view_count"].replace(0, np.nan)) * 100
     df["duration_min"] = (df["duration_sec"] / 60).round(1)
 
@@ -132,71 +131,16 @@ def load_youtube_data(_):
     ch_views = (df.groupby("channel")["view_count"].sum().sort_values(ascending=False).head(10).reset_index())
     fig1 = px.bar(ch_views, x="channel", y="view_count", template="plotly_dark")
     fig1.update_xaxes(tickangle=-25)
-    mini_charts.append(make_card("Views by Channel", fig1))
+    mini_charts.append(make_card("Views by Channel", fig1, md_col=4))
 
-    # 2 Likes vs comments
+    trend_df = (df.groupby(df["upload_date"].dt.date).agg({"video_id": "count","view_count": "sum"}).reset_index())
+    fig2 = px.line(trend_df, x="upload_date", y="view_count", markers=True, template="plotly_dark")
+    mini_charts.append(make_card("Daily Views Trend", fig2, md_col=4))
 
-    fig2 = px.scatter(
-        df,
-        x="view_count",
-        y="like_count",
-        size="comment_count",
-        color="channel",
-        hover_data=["title"],
-        template="plotly_dark"
-    )
-
-    mini_charts.append(
-        make_card("Engagement Bubble", fig2)
-    )
-
-    # 3 Upload trend
-
-    trend_df = (
-        df.groupby(df["upload_date"].dt.date)
-        .agg({
-            "video_id": "count",
-            "view_count": "sum"
-        })
-        .reset_index()
-    )
-
-    fig3 = px.line(
-        trend_df,
-        x="upload_date",
-        y="view_count",
-        markers=True,
-        template="plotly_dark"
-    )
-
-    mini_charts.append(
-        make_card("Daily Views Trend", fig3)
-    )
-
-    # 4 Avg engagement
-
-    eng_df = (
-        df.groupby("channel")["engagement_rate"]
-        .mean()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
-
-    fig4 = px.bar(
-        eng_df,
-        x="channel",
-        y="engagement_rate",
-        template="plotly_dark"
-    )
-
-    fig4.update_xaxes(
-        tickangle=-25
-    )
-
-    mini_charts.append(
-        make_card("Avg Engagement %", fig4)
-    )
+    eng_df = (df.groupby("channel")["engagement_rate"].mean().sort_values(ascending=False).head(10).reset_index())
+    fig3 = px.bar(eng_df, x="channel", y="engagement_rate", template="plotly_dark")
+    fig3.update_xaxes(tickangle=-25)
+    mini_charts.append(make_card("Avg Engagement %", fig3, md_col=4))
 
     # -------------------------------------------------
     # MINI TABLES
