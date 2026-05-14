@@ -70,7 +70,7 @@ async def get_youtube_metrics_api(req: YouTubeRequest):
 
     try:
         load_info = pipeline.run(youtube_resource(data),  
-            write_disposition={"disposition": "merge", "strategy": "upsert"}                    
+            write_disposition={"disposition": "merge", "strategy": "upsert"},                    
             primary_key="video_id")
 
     except PipelineStepFailed as e: 
