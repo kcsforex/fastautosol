@@ -443,7 +443,7 @@ def load_youtube_data(_):
         hover=True,
         responsive=True,
         borderless=True,
-        className="text-light small",
+        className="text-light text-success small",
         style={
             "backgroundColor": "transparent",
             "--bs-table-bg": "transparent",
