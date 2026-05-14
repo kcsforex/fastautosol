@@ -1,8 +1,3 @@
-# youtube_dashboard.py
-# Based on crm_serper.py structure
-# Dash + PostgreSQL + Mini Charts + Mini Tables + Comment Log
-# Source table: bronze.youtube_metrics
-
 import dash
 import pandas as pd
 import numpy as np
@@ -18,35 +13,16 @@ from datetime import datetime
 # -------------------------------------------------
 # CONFIG
 # -------------------------------------------------
-
 DB_CONFIG = "postgresql+psycopg://sql_admin:sql_pass@postgresql:5432/n8n"
 
-sql_engine = create_engine(
-    DB_CONFIG,
-    pool_size=5,
-    max_overflow=10,
-    pool_pre_ping=True,
-    pool_recycle=1800,
-    connect_args={
-        'connect_timeout': 5,
-        'keepalives': 1,
-        'keepalives_idle': 30,
-        'keepalives_interval': 10,
-        'keepalives_count': 5
-    }
-)
+sql_engine = create_engine(DB_CONFIG, pool_size=5, max_overflow=10, pool_pre_ping=True, pool_recycle=1800,
+    connect_args={'connect_timeout': 5, 'keepalives': 1, 'keepalives_idle': 30, 'keepalives_interval': 10, 'keepalives_count': 5})
 
-dash.register_page(
-    __name__,
-    icon="fa-brands fa-youtube",
-    name="Youtube Dashboard",
-    order=7
-)
+dash.register_page(__name__, icon="fa-brands fa-youtube", name="Youtube Dashboard",order=7)
 
 # -------------------------------------------------
 # STYLE
 # -------------------------------------------------
-
 CARD_STYLE = {
     "background": "rgba(255, 255, 255, 0.03)",
     "backdrop-filter": "blur(10px)",
@@ -57,11 +33,9 @@ CARD_STYLE = {
 }
 
 DASH_ID_TAG = "youtube"
-
 # -------------------------------------------------
 # LAYOUT
 # -------------------------------------------------
-
 layout = dbc.Container([
 
     html.Div([
@@ -102,44 +76,18 @@ layout = dbc.Container([
 def make_card(title, content, is_graph=True, md_col=3):
 
     if is_graph:
-        content.update_layout(
-            height=220,
-            margin=dict(l=10, r=10, t=30, b=10),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            font=dict(color="white")
-        )
-
+        content.update_layout(height=220, margin=dict(l=10, r=10, t=30, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(color="white"))
     return dbc.Col([
-
         html.Div([
-
             html.H6(title, className="text-success mb-2", style={ "color": "#ef4444", "fontWeight": "500"} ),
             dcc.Graph( figure=content, config={"displayModeBar": False}, style={"height": "240px"})
             if is_graph else html.Div(content, style={ "height": "240px", "overflowY": "auto"})
-
         ], style=CARD_STYLE)
-
     ], md=md_col)
 
-
 def make_table(df_table):
-
-    return dbc.Table.from_dataframe(
-        df_table,
-        striped=False,
-        hover=True,
-        responsive=True,
-        borderless=True,
-        className="text-light small",
-        style={
-            "backgroundColor": "transparent",
-            "--bs-table-bg": "transparent",
-            "--bs-table-accent-bg": "transparent",
-            "color": "white"
-        }
-    )
-
+    return dbc.Table.from_dataframe(df_table, striped=False, hover=True, responsive=True, borderless=True, className="text-light small",
+        style={"backgroundColor": "transparent",  "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"})
 
 # -------------------------------------------------
 # CALLBACK
@@ -155,62 +103,25 @@ def make_table(df_table):
 
 def load_youtube_data(_):
 
-    # -------------------------------------------------
-    # LOAD
-    # -------------------------------------------------
-
-    query = """
-    SELECT *
-    FROM bronze.youtube_metrics
-    ORDER BY _ingested_at DESC
-    LIMIT 500
-    """
-
+    query = "SELECT * FROM bronze.youtube_metrics ORDER BY _ingested_at DESC LIMIT 500"
     with sql_engine.connect() as conn:
         df = pd.read_sql(query, conn)
-
     if df.empty:
         return None, [], [], None
 
-    # -------------------------------------------------
-    # CLEAN
-    # -------------------------------------------------
-
     df.columns = [c.lower() for c in df.columns]
-
-    numeric_cols = [
-        "view_count",
-        "like_count",
-        "comment_count",
-        "duration_sec"
-    ]
-
+    numeric_cols = ["view_count", "like_count", "comment_count", "duration_sec"]
     for c in numeric_cols:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    df["upload_date"] = pd.to_datetime(
-        df["upload_date"],
-        errors="coerce"
-    )
+    df["upload_date"] = pd.to_datetime(df["upload_date"], errors="coerce")
+    df["_ingested_at"] = pd.to_datetime(df["_ingested_at"], errors="coerce")
 
-    df["_ingested_at"] = pd.to_datetime(
-        df["_ingested_at"],
-        errors="coerce"
-    )
-
-    # remove duplicates
-    df = df.sort_values("_ingested_at") \
-           .drop_duplicates(subset=["video_id"], keep="last")
+    df = df.sort_values("_ingested_at").drop_duplicates(subset=["video_id"], keep="last")
 
     # engagement ratio
-    df["engagement_rate"] = (
-        (df["like_count"] + df["comment_count"])
-        / df["view_count"].replace(0, np.nan)
-    ) * 100
-
-    df["duration_min"] = (
-        df["duration_sec"] / 60
-    ).round(1)
+    df["engagement_rate"] = ((df["like_count"] + df["comment_count"]) / df["view_count"].replace(0, np.nan)) * 100
+    df["duration_min"] = (df["duration_sec"] / 60).round(1)
 
     # -------------------------------------------------
     # MINI CHARTS
@@ -218,30 +129,10 @@ def load_youtube_data(_):
 
     mini_charts = []
 
-    # 1 Views by channel
-
-    ch_views = (
-        df.groupby("channel")["view_count"]
-        .sum()
-        .sort_values(ascending=False)
-        .head(10)
-        .reset_index()
-    )
-
-    fig1 = px.bar(
-        ch_views,
-        x="channel",
-        y="view_count",
-        template="plotly_dark"
-    )
-
-    fig1.update_xaxes(
-        tickangle=-25
-    )
-
-    mini_charts.append(
-        make_card("Views by Channel", fig1)
-    )
+    ch_views = (df.groupby("channel")["view_count"].sum().sort_values(ascending=False).head(10).reset_index())
+    fig1 = px.bar(ch_views, x="channel", y="view_count", template="plotly_dark")
+    fig1.update_xaxes(tickangle=-25)
+    mini_charts.append(make_card("Views by Channel", fig1))
 
     # 2 Likes vs comments
 
