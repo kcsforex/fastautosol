@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import requests
 
-dash.register_page(__name__, name="AI Min Analytics", icon="fa-robot", order=8)
+dash.register_page(__name__, name="AI Min Analytics", icon="fa-solid fa-robot", order=8)
 
 CARD_STYLE = {
     "background": "rgba(255,255,255,0.03)", "backdropFilter": "blur(10px)",
