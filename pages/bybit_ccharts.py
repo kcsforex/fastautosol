@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 from apis.bybit_api import sql_engine
 
 # ----- 3. THE FRONTEND (Dash Sidebar uses this) -----
-dash.register_page(__name__, icon="fa-coins", name="Bybit Cryptos", order=1)
+dash.register_page(__name__, icon="fa-solid fa-coins", name="Bybit Cryptos", order=1)
 
 # Glassmorphism Card Style
 CARD_STYLE = {
