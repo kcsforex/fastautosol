@@ -1,77 +1,83 @@
 import dash
-from dash import html
+from dash import html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
+import subprocess, json
 
-dash.register_page(__name__, path='/', icon="fa-solid fa-house", name="Home")
+dash.register_page(__name__, path='/vps', icon="fa-solid fa-server", name="VPS Info")
 
-def info_card(icon, title, value, color="primary"):
-    return dbc.Card([
-        dbc.CardBody([
-            html.Div([
-                html.I(className=f"fa-solid {icon} fa-2x text-{color} mb-2"),
-                html.H6(title, className="text-muted mb-1"),
-                html.H4(value, className="fw-bold mb-0"),
-            ], className="text-center")
-        ])
-    ], className="h-100 border-0 shadow-sm")
+def get_docker_stats():
+    try:
+        result = subprocess.run(
+            ["docker", "stats", "--no-stream", "--format", "{{json .}}"],
+            capture_output=True, text=True, timeout=15
+        )
+        return [json.loads(l) for l in result.stdout.strip().split("\n") if l]
+    except Exception as e:
+        return []
+
+def make_table(stats):
+    if not stats:
+        return html.P("No containers found or docker not accessible.", className="text-warning")
+
+    rows = []
+    for c in stats:
+        # shorten name
+        name = c.get("Name", "")[:30]
+        cpu  = c.get("CPUPerc", "-")
+        mem  = c.get("MemUsage", "-")
+        memp = c.get("MemPerc", "-")
+        net  = c.get("NetIO", "-")
+        blk  = c.get("BlockIO", "-")
+        pids = c.get("PIDs", "-")
+
+        # color CPU cell
+        cpu_val = float(cpu.replace("%","")) if "%" in cpu else 0
+        cpu_color = "danger" if cpu_val > 50 else "warning" if cpu_val > 20 else "success"
+
+        rows.append(html.Tr([
+            html.Td(html.Code(c.get("ID","")[:12], className="text-muted")),
+            html.Td(name),
+            html.Td(dbc.Badge(cpu, color=cpu_color)),
+            html.Td(mem),
+            html.Td(memp),
+            html.Td(net),
+            html.Td(blk),
+            html.Td(pids),
+        ]))
+
+    return dbc.Table([
+        html.Thead(html.Tr([
+            html.Th("ID"), html.Th("Name"), html.Th("CPU %"),
+            html.Th("MEM Usage"), html.Th("MEM %"),
+            html.Th("NET I/O"), html.Th("Block I/O"), html.Th("PIDs"),
+        ])),
+        html.Tbody(rows)
+    ], bordered=True, hover=True, responsive=True, size="sm", className="table-dark")
 
 layout = dbc.Container([
-
-    # Header
     dbc.Row([
         dbc.Col([
-            html.H2([
-                html.I(className="fa-solid fa-robot me-2 text-primary"),
-                "Trading Bot Dashboard"
-            ], className="mt-2 mb-0"),
-            html.P("Welcome — select a module from the sidebar to get started.",
-                   className="text-muted mb-4"),
+            html.H3([html.I(className="fa-solid fa-server me-2 text-primary"), "VPS Docker Stats"]),
+            html.Small(id="vps-last-updated", className="text-muted"),
             html.Hr(),
         ])
     ]),
 
-    # Stats row
+    # Auto-refresh every 10 seconds
+    dcc.Interval(id="vps-interval", interval=10_000, n_intervals=0),
+
     dbc.Row([
-        dbc.Col(info_card("fa-server",     "Instance",  "8GB KVM",     "primary"),  md=3),
-        dbc.Col(info_card("fa-circle",     "Status",    "Online",      "success"),  md=3),
-        dbc.Col(info_card("fa-gauge-high", "Load",      "Normal",      "warning"),  md=3),
-        dbc.Col(info_card("fa-clock",      "Uptime",    "3d 14h",      "info"),     md=3),
-    ], className="g-3 mb-4"),
-
-    # Quick links
-    dbc.Row([
-        dbc.Col([
-            html.H5([
-                html.I(className="fa-solid fa-bolt me-2 text-warning"),
-                "Quick Navigation"
-            ], className="mb-3"),
-            dbc.ListGroup([
-                dbc.ListGroupItem([
-                    html.I(className="fa-solid fa-server me-2 text-primary"),
-                    "VPS System Info"
-                ], href="/vps", action=True, className="bg-transparent border-secondary text-light"),
-                dbc.ListGroupItem([
-                    html.I(className="fa-solid fa-chart-line me-2 text-success"),
-                    "ML Engine"
-                ], href="/ml2", action=True, className="bg-transparent border-secondary text-light"),
-            ], flush=True)
-        ], md=6),
-
-        dbc.Col([
-            html.H5([
-                html.I(className="fa-solid fa-circle-info me-2 text-info"),
-                "About"
-            ], className="mb-3"),
-            dbc.Card([
-                dbc.CardBody([
-                    html.P("This dashboard provides tools for automated trading, "
-                           "machine learning analysis, and server monitoring.",
-                           className="text-muted mb-2"),
-                    html.Small("Built with Dash + Bootstrap · FA7 Icons",
-                               className="text-secondary"),
-                ])
-            ], className="border-0 shadow-sm h-100")
-        ], md=6),
-    ], className="g-3"),
-
+        dbc.Col(html.Div(id="vps-table"))
+    ])
 ], fluid=True, className="py-3")
+
+@callback(
+    Output("vps-table", "children"),
+    Output("vps-last-updated", "children"),
+    Input("vps-interval", "n_intervals")
+)
+def update_stats(_):
+    from datetime import datetime
+    stats = get_docker_stats()
+    updated = f"Last updated: {datetime.now().strftime('%H:%M:%S')}"
+    return make_table(stats), updated
