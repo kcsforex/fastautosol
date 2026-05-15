@@ -10,7 +10,7 @@ import plotly.express as px
 from apis.bybit_api import sql_engine
 
 # ----- 3. THE FRONTEND (Dash Sidebar uses this) -----
-dash.register_page(__name__, icon="fa-coins", name="Bybit Dashboard", order=2)
+dash.register_page(__name__, icon="fa-solid fa-coins", name="Bybit Dashboard", order=2)
 
 # Glassmorphism Card Style
 CARD_STYLE = {
