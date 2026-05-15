@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 import docker
 
-dash.register_page(__name__, path="/", icon="fa-solid fa-server", name="Home")
+dash.register_page(__name__, path="/", icon="fa-solid fa-server", name="Home", order=0)
 
 client = docker.from_env()
 
