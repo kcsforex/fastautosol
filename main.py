@@ -72,7 +72,7 @@ sidebar = html.Div([
     dbc.Nav([
         dbc.NavLink([
             html.Div([
-                html.I(className=f"{page.get('icon', 'fa-solid fa-chart-line')} me-2")
+                html.I(className=f"{page.get('icon', 'fa-solid fa-chart-line')} me-2"),
                 html.Span(page["name"]),
             ], className="d-flex align-items-center")
         ], href=page["relative_path"], active="exact", className="mb-2 py-2 ps-2 rounded-3 text-light")
