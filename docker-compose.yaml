@@ -124,7 +124,7 @@ services:
     expose:
     - "8000"
     volumes:
-    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - /var/run/docker.sock:/var/run/docker.sock
     environment:
       DB_HOST: postgresql
       DB_PORT: 5432
