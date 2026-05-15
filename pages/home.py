@@ -8,6 +8,8 @@ import docker
 
 dash.register_page(__name__, path="/", icon="fa-solid fa-server", name="Home", order=0)
 
+ALLOWED_PREFIXES = ("xstock", "crypto", "n8n", "python-dash", "mcp-postgres", "crawl4ai", "postgresql")
+
 def fetch_one(c) -> dict:
     s = c.stats(stream=False)
 
@@ -33,7 +35,8 @@ def fetch_one(c) -> dict:
 def get_docker_stats() -> pd.DataFrame:
     try:
         client     = docker.from_env()  # fresh client every call to avoid stale connections
-        containers = client.containers.list()
+        #containers = client.containers.list()
+        containers = [c for c in client.containers.list() if c.name.startswith(ALLOWED_PREFIXES)] 
         with ThreadPoolExecutor(max_workers=len(containers) or 1) as ex:
             rows = list(ex.map(fetch_one, containers))
         return pd.DataFrame(rows)
