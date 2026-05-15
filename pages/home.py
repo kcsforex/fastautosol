@@ -1,126 +1,54 @@
-import docker
-from datetime import datetime, timezone
-
 import dash
 from dash import html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
-
-
-# -------------------------------------------------
-# PAGE
-# -------------------------------------------------
+import docker
 
 dash.register_page(
     __name__,
-    path="/",
+    path='/',
     icon="fa-solid fa-server",
     name="Home"
 )
 
-
-# -------------------------------------------------
-# DOCKER CLIENT
-# -------------------------------------------------
-
+# Docker client
 client = docker.from_env()
 
 
-# -------------------------------------------------
-# HELPERS
-# -------------------------------------------------
-
-def cpu_percent(stats):
-
-    try:
-        cpu_delta = (
-            stats["cpu_stats"]["cpu_usage"]["total_usage"]
-            - stats["precpu_stats"]["cpu_usage"]["total_usage"]
-        )
-
-        system_delta = (
-            stats["cpu_stats"]["system_cpu_usage"]
-            - stats["precpu_stats"]["system_cpu_usage"]
-        )
-
-        online_cpus = stats["cpu_stats"].get("online_cpus", 1)
-
-        if system_delta > 0:
-
-            return round(
-                (cpu_delta / system_delta)
-                * online_cpus
-                * 100.0,
-                2
-            )
-
-    except Exception:
-        pass
-
-    return 0.0
-
-
-def format_mb(v):
-
-    try:
-        return f"{round(v / 1024 / 1024, 1)} MiB"
-    except Exception:
-        return "-"
-
-
-def format_net(v):
-
-    try:
-        return f"{round(v / 1024 / 1024, 2)} MB"
-    except Exception:
-        return "-"
-
-
-def uptime_from(started_at):
-
-    try:
-
-        dt = datetime.fromisoformat(
-            started_at.replace("Z", "+00:00")
-        )
-
-        delta = datetime.now(timezone.utc) - dt
-
-        total_hours = int(
-            delta.total_seconds() // 3600
-        )
-
-        if total_hours < 24:
-            return f"{total_hours}h"
-
-        days = total_hours // 24
-        hours = total_hours % 24
-
-        return f"{days}d {hours}h"
-
-    except Exception:
-        return "-"
-
-
-# -------------------------------------------------
-# DOCKER STATS
-# -------------------------------------------------
-
 def get_docker_stats():
 
-    rows = []
-
     try:
 
-        containers = client.containers.list(all=False)
+        containers = client.containers.list()
+
+        stats_list = []
 
         for c in containers:
 
             stats = c.stats(stream=False)
 
-            # MEMORY
+            # CPU %
+            cpu_delta = (
+                stats["cpu_stats"]["cpu_usage"]["total_usage"]
+                - stats["precpu_stats"]["cpu_usage"]["total_usage"]
+            )
+
+            system_delta = (
+                stats["cpu_stats"]["system_cpu_usage"]
+                - stats["precpu_stats"]["system_cpu_usage"]
+            )
+
+            cpus = stats["cpu_stats"].get("online_cpus", 1)
+
+            cpu = round(
+                (cpu_delta / system_delta) * cpus * 100,
+                2
+            ) if system_delta > 0 else 0
+
+            # MEM
             mem_usage = (
                 stats["memory_stats"]
                 .get("usage", 0)
+                / 1024 / 1024
             )
 
             mem_limit = (
@@ -129,15 +57,15 @@ def get_docker_stats():
             )
 
             mem_pct = round(
-                (mem_usage / mem_limit) * 100,
-                2
+                (
+                    stats["memory_stats"].get("usage", 0)
+                    / mem_limit
+                ) * 100,
+                1
             )
 
-            # NETWORK
-            networks = stats.get(
-                "networks",
-                {}
-            )
+            # NET
+            networks = stats.get("networks", {})
 
             rx = sum(
                 v.get("rx_bytes", 0)
@@ -149,235 +77,64 @@ def get_docker_stats():
                 for v in networks.values()
             )
 
-            # PIDS
-            pids = (
-                stats.get("pids_stats", {})
-                .get("current", 0)
-            )
+            stats_list.append({
 
-            # RESTARTS
-            restart_count = (
-                c.attrs.get("RestartCount", 0)
-            )
+                "ID": c.short_id,
 
-            # START TIME
-            started_at = (
-                c.attrs["State"]
-                .get("StartedAt", "")
-            )
+                "Name": c.name[:30],
 
-            rows.append({
+                "CPU": f"{cpu}%",
 
-                "id": c.short_id,
+                "MemUsage": f"{mem_usage:.1f} MiB",
 
-                "name": c.name[:35],
+                "MemPerc": f"{mem_pct}%",
 
-                "status": c.status,
-
-                "cpu": cpu_percent(stats),
-
-                "mem_usage": format_mb(mem_usage),
-
-                "mem_pct": mem_pct,
-
-                "net_io": (
-                    f"{format_net(rx)} / "
-                    f"{format_net(tx)}"
+                "NetIO": (
+                    f"{rx/1024/1024:.1f}MB / "
+                    f"{tx/1024/1024:.1f}MB"
                 ),
 
-                "pids": pids,
+                "PIDs": (
+                    stats.get("pids_stats", {})
+                    .get("current", 0)
+                ),
 
-                "restart_count": restart_count,
-
-                "uptime": uptime_from(started_at),
-
-                "image": (
-                    c.image.tags[0]
-                    if c.image.tags
-                    else "none"
-                )
+                "Status": c.status
 
             })
 
-        rows.sort(
-            key=lambda x: x["cpu"],
-            reverse=True
-        )
-
-        return rows
+        return stats_list
 
     except Exception as e:
 
-        print(
-            f"Docker stats error: {e}"
-        )
+        print(e)
 
         return []
 
-
-# -------------------------------------------------
-# KPI CARDS
-# -------------------------------------------------
-
-def make_kpis(stats):
-
-    total_containers = len(stats)
-
-    total_cpu = round(
-        sum(c["cpu"] for c in stats),
-        1
-    )
-
-    total_mem = round(
-
-        sum(
-
-            float(
-                c["mem_usage"]
-                .split()[0]
-            )
-
-            for c in stats
-
-            if c["mem_usage"] != "-"
-
-        ),
-
-        1
-
-    )
-
-    unhealthy = len([
-
-        c for c in stats
-
-        if c["status"] != "running"
-
-    ])
-
-    return dbc.Row([
-
-        dbc.Col(
-
-            dbc.Card([
-
-                dbc.CardBody([
-
-                    html.H6("Containers"),
-
-                    html.H3(total_containers)
-
-                ])
-
-            ]),
-
-            md=3
-
-        ),
-
-        dbc.Col(
-
-            dbc.Card([
-
-                dbc.CardBody([
-
-                    html.H6("Total CPU"),
-
-                    html.H3(f"{total_cpu}%")
-
-                ])
-
-            ]),
-
-            md=3
-
-        ),
-
-        dbc.Col(
-
-            dbc.Card([
-
-                dbc.CardBody([
-
-                    html.H6("RAM Usage"),
-
-                    html.H3(f"{total_mem} MiB")
-
-                ])
-
-            ]),
-
-            md=3
-
-        ),
-
-        dbc.Col(
-
-            dbc.Card([
-
-                dbc.CardBody([
-
-                    html.H6("Unhealthy"),
-
-                    html.H3(unhealthy)
-
-                ])
-
-            ]),
-
-            md=3
-
-        )
-
-    ], className="mb-4")
-
-
-# -------------------------------------------------
-# TABLE
-# -------------------------------------------------
 
 def make_table(stats):
 
     if not stats:
 
         return html.P(
-
-            "No containers found or Docker socket not accessible.",
-
+            "No containers found or docker not accessible.",
             className="text-warning"
-
         )
 
     rows = []
 
     for c in stats:
 
-        cpu_color = (
-
-            "danger"
-
-            if c["cpu"] > 50
-
-            else "warning"
-
-            if c["cpu"] > 20
-
-            else "success"
-
+        cpu_val = float(
+            c["CPU"].replace("%", "")
         )
 
-        mem_color = (
-
+        cpu_color = (
             "danger"
-
-            if c["mem_pct"] > 80
-
+            if cpu_val > 50
             else "warning"
-
-            if c["mem_pct"] > 50
-
+            if cpu_val > 20
             else "success"
-
         )
 
         rows.append(
@@ -385,67 +142,39 @@ def make_table(stats):
             html.Tr([
 
                 html.Td(
-
                     html.Code(
-
-                        c["id"],
-
+                        c["ID"],
                         className="text-muted"
-
                     )
-
                 ),
 
-                html.Td(c["name"]),
+                html.Td(c["Name"]),
 
                 html.Td(
-
                     dbc.Badge(
-
-                        f'{c["cpu"]:.2f}%',
-
+                        c["CPU"],
                         color=cpu_color
-
                     )
-
                 ),
 
-                html.Td(c["mem_usage"]),
+                html.Td(c["MemUsage"]),
+
+                html.Td(c["MemPerc"]),
+
+                html.Td(c["NetIO"]),
+
+                html.Td(c["PIDs"]),
 
                 html.Td(
 
                     dbc.Badge(
 
-                        f'{c["mem_pct"]}%',
-
-                        color=mem_color
-
-                    )
-
-                ),
-
-                html.Td(c["net_io"]),
-
-                html.Td(c["pids"]),
-
-                html.Td(c["restart_count"]),
-
-                html.Td(c["uptime"]),
-
-                html.Td(
-
-                    dbc.Badge(
-
-                        c["status"],
+                        c["Status"],
 
                         color=(
-
                             "success"
-
-                            if c["status"] == "running"
-
+                            if c["Status"] == "running"
                             else "danger"
-
                         )
 
                     )
@@ -466,21 +195,17 @@ def make_table(stats):
 
                     html.Th("ID"),
 
-                    html.Th("Container"),
+                    html.Th("Name"),
 
                     html.Th("CPU %"),
 
-                    html.Th("RAM"),
+                    html.Th("MEM Usage"),
 
-                    html.Th("RAM %"),
+                    html.Th("MEM %"),
 
                     html.Th("NET I/O"),
 
                     html.Th("PIDs"),
-
-                    html.Th("Restarts"),
-
-                    html.Th("Uptime"),
 
                     html.Th("Status"),
 
@@ -493,23 +218,14 @@ def make_table(stats):
         ],
 
         bordered=True,
-
         hover=True,
-
         responsive=True,
-
-        striped=True,
-
         size="sm",
-
-        className="table-dark align-middle"
+        striped=True,
+        className="table-dark"
 
     )
 
-
-# -------------------------------------------------
-# LAYOUT
-# -------------------------------------------------
 
 layout = dbc.Container([
 
@@ -520,21 +236,16 @@ layout = dbc.Container([
             html.H3([
 
                 html.I(
-
                     className="fa-solid fa-server me-2 text-primary"
-
                 ),
 
-                "VPS Docker Monitor"
+                "VPS Docker Stats"
 
             ]),
 
             html.Small(
-
                 id="vps-last-updated",
-
                 className="text-muted"
-
             ),
 
             html.Hr(),
@@ -543,25 +254,12 @@ layout = dbc.Container([
 
     ]),
 
+    # auto refresh
     dcc.Interval(
-
         id="vps-interval",
-
         interval=10_000,
-
         n_intervals=0
-
     ),
-
-    dbc.Row([
-
-        dbc.Col(
-
-            html.Div(id="vps-kpis")
-
-        )
-
-    ]),
 
     dbc.Row([
 
@@ -576,43 +274,24 @@ layout = dbc.Container([
 ], fluid=True, className="py-3")
 
 
-# -------------------------------------------------
-# CALLBACK
-# -------------------------------------------------
-
 @callback(
 
-    [
+    Output("vps-table", "children"),
 
-        Output("vps-kpis", "children"),
-
-        Output("vps-table", "children"),
-
-        Output("vps-last-updated", "children"),
-
-    ],
+    Output("vps-last-updated", "children"),
 
     Input("vps-interval", "n_intervals")
 
 )
 def update_stats(_):
 
+    from datetime import datetime
+
     stats = get_docker_stats()
 
     updated = (
-
-        "Last updated: "
-
-        + datetime.now().strftime("%H:%M:%S")
-
+        f"Last updated: "
+        f"{datetime.now().strftime('%H:%M:%S')}"
     )
 
-    return (
-
-        make_kpis(stats),
-
-        make_table(stats),
-
-        updated
-
-    )
+    return make_table(stats), updated
