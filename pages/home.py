@@ -3,27 +3,16 @@ from dash import html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import docker
 
-dash.register_page(
-    __name__,
-    path='/',
-    icon="fa-solid fa-server",
-    name="Home"
-)
+dash.register_page(__name__, path='/', icon="fa-solid fa-server", name="Home")
 
 # Docker client
 client = docker.from_env()
 
-
 def get_docker_stats():
-
     try:
-
         containers = client.containers.list()
-
         stats_list = []
-
         for c in containers:
-
             stats = c.stats(stream=False)
 
             # CPU %
@@ -51,31 +40,10 @@ def get_docker_stats():
                 / 1024 / 1024
             )
 
-            mem_limit = (
-                stats["memory_stats"]
-                .get("limit", 1)
-            )
+            mem_limit = (stats["memory_stats"].get("limit", 1))
+            mem_pct = round((stats["memory_stats"].get("usage", 0) / mem_limit) * 100, 1)
 
-            mem_pct = round(
-                (
-                    stats["memory_stats"].get("usage", 0)
-                    / mem_limit
-                ) * 100,
-                1
-            )
-
-            # NET
-            networks = stats.get("networks", {})
-
-            rx = sum(
-                v.get("rx_bytes", 0)
-                for v in networks.values()
-            )
-
-            tx = sum(
-                v.get("tx_bytes", 0)
-                for v in networks.values()
-            )
+ 
 
             stats_list.append({
 
@@ -89,15 +57,6 @@ def get_docker_stats():
 
                 "MemPerc": f"{mem_pct}%",
 
-                "NetIO": (
-                    f"{rx/1024/1024:.1f}MB / "
-                    f"{tx/1024/1024:.1f}MB"
-                ),
-
-                "PIDs": (
-                    stats.get("pids_stats", {})
-                    .get("current", 0)
-                ),
 
                 "Status": c.status
 
