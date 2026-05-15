@@ -50,7 +50,7 @@ layout = dbc.Container([
         html.Hr(),
     ])),
 
-    dcc.Interval(id="vps-interval", interval=10_000, n_intervals=0),
+    dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0),
     dbc.Row(dbc.Col(html.Div(id="vps-table"))),
 
 ], fluid=True, className="py-3")
