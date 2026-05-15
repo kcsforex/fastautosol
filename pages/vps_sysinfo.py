@@ -10,7 +10,7 @@ import shutil
 import psutil
 from importlib.metadata import version, PackageNotFoundError
 
-dash.register_page( __name__, name="VPS SysInfo", icon="fa-solid fa-server", order=9)
+dash.register_page( __name__, name="VPS SysInfo", icon="fa-solid fa-server", order=8)
 
 CARD_STYLE = {
     "background": "rgba(255, 255, 255, 0.03)", "backdropFilter": "blur(10px)",
