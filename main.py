@@ -4,8 +4,8 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from fastapi import FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
-from contextlib import asynccontextmanager
-import asyncio
+#from contextlib import asynccontextmanager
+#import asyncio
 
 import apis.crm_shopify_api as crm_shopify_api
 import apis.bybit_api as bybit
