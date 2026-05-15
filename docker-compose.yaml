@@ -123,6 +123,8 @@ services:
         condition: service_healthy
     expose:
     - "8000"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       DB_HOST: postgresql
       DB_PORT: 5432
