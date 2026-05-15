@@ -20,7 +20,7 @@ import apis.youtube_api as youtube_api
 app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.DARKLY, "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"])
 
 # ----- 2. NOW IMPORT YOUR PAGES -----
-from pages import home, bybit_ccharts, bybit_lcharts, crm_serper, crm_shopify, mexc_charts, mcp, lufthansa_charts, youtube_charts
+from pages import home, bybit_ccharts, bybit_lcharts, crm_serper, crm_shopify, mexc_charts, lufthansa_charts, youtube_charts, vps_sysinfo
 
 # ----- 3. FASTAPI WRAPPER -----
 server = FastAPI(title="Dash Main App")
