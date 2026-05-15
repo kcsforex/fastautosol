@@ -3,7 +3,7 @@ from dash import html, dcc, callback, Output, Input
 import dash_bootstrap_components as dbc
 import subprocess, json
 
-dash.register_page(__name__, path='/vps', icon="fa-solid fa-server", name="VPS Info")
+dash.register_page(__name__, path='/', icon="fa-solid fa-server", name="Home")
 
 def get_docker_stats():
     try:
