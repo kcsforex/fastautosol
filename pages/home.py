@@ -16,72 +16,36 @@ def get_docker_stats():
             stats = c.stats(stream=False)
 
             # CPU %
-            cpu_delta = (
-                stats["cpu_stats"]["cpu_usage"]["total_usage"]
-                - stats["precpu_stats"]["cpu_usage"]["total_usage"]
-            )
-
-            system_delta = (
-                stats["cpu_stats"]["system_cpu_usage"]
-                - stats["precpu_stats"]["system_cpu_usage"]
-            )
-
+            cpu_delta = (stats["cpu_stats"]["cpu_usage"]["total_usage"] - stats["precpu_stats"]["cpu_usage"]["total_usage"])
+            system_delta = (stats["cpu_stats"]["system_cpu_usage"] - stats["precpu_stats"]["system_cpu_usage"])
             cpus = stats["cpu_stats"].get("online_cpus", 1)
-
-            cpu = round(
-                (cpu_delta / system_delta) * cpus * 100,
-                2
-            ) if system_delta > 0 else 0
+            cpu = round((cpu_delta / system_delta) * cpus * 100, 2) if system_delta > 0 else 0
 
             # MEM
-            mem_usage = (
-                stats["memory_stats"]
-                .get("usage", 0)
-                / 1024 / 1024
-            )
-
+            mem_usage = (stats["memory_stats"].get("usage", 0) / 1024 / 1024)
             mem_limit = (stats["memory_stats"].get("limit", 1))
             mem_pct = round((stats["memory_stats"].get("usage", 0) / mem_limit) * 100, 1)
 
- 
-
             stats_list.append({
-
                 "ID": c.short_id,
-
                 "Name": c.name[:30],
-
                 "CPU": f"{cpu}%",
-
                 "MemUsage": f"{mem_usage:.1f} MiB",
-
                 "MemPerc": f"{mem_pct}%",
-
-
                 "Status": c.status
-
             })
 
         return stats_list
 
     except Exception as e:
-
         print(e)
-
         return []
 
-
 def make_table(stats):
-
     if not stats:
-
-        return html.P(
-            "No containers found or docker not accessible.",
-            className="text-warning"
-        )
+        return html.P("No containers found or docker not accessible.", className="text-warning")
 
     rows = []
-
     for c in stats:
 
         cpu_val = float(
