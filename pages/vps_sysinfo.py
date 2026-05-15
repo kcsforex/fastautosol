@@ -10,6 +10,8 @@ import shutil
 import psutil
 from importlib.metadata import version, PackageNotFoundError
 
+dash.register_page( __name__, name="VPS SysInfo", icon="fa-solid fa-server", order=9)
+
 CARD_STYLE = {
     "background": "rgba(255, 255, 255, 0.03)", "backdropFilter": "blur(10px)",
     "borderRadius": "15px", "border": "1px solid rgba(255, 255, 255, 0.1)", "padding": "20px"}
@@ -37,8 +39,6 @@ def get_host_metrics():
     return [ ("CPU Usage", f"{cpu} %"), ("CPU Cores", psutil.cpu_count(logical=True)), ("CPU Frequency", f"{cpu_freq.current:.0f} MHz"),
         ("Memory Usage", f"{mem.percent} %"), ("Memory Total", f"{mem.total / (1024**3):.1f} GB"),
         ("Disk Usage", f"{disk.used / disk.total * 100:.1f} %"), ("Disk Total", f"{disk.total / (1024**3):.1f} GB")]
-
-dash.register_page( __name__, path="/", name="VPS SysInfo", icon="fa-solid fa-server", order=9)
 
 layout = dbc.Container([
 
