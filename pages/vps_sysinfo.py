@@ -125,8 +125,8 @@ def render_tables(_, n_clicks):
     if docker_stats_df.empty:
         docker_tbl = html.P("No containers found or Docker not accessible.", className="text-warning")
     else:
-        docker_tbl = dbc.Table.from_dataframe(docker_stats_df, bordered=True, hover=True, responsive=True, size="sm", striped=True, 
-            className="table-dark", style=TABLE_STYLE)
+        docker_tbl = dbc.Table.from_dataframe(docker_stats_df, striped=False, hover=True, responsive=True, borderless=True, 
+            className="text-light table-sm m-0", style=TABLE_STYLE)
  
     env_df = pd.DataFrame(runtime_info + host_metrics, columns=["Metric", "Value"])
     env_tbl = dbc.Table.from_dataframe(env_df, striped=False, hover=True, responsive=True, borderless=True, 
