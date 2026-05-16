@@ -83,7 +83,7 @@ layout = dbc.Container([
                 html.H5("VPS Docker Stats", className="text-info"),
                 html.Div(id="docker-table"),
             ]), style=CARD_STYLE), width=12)
-    ], className="mb-5"),
+    ], className="mb-4"),
 
     dbc.Row([
     dbc.Col(
