@@ -17,24 +17,7 @@ layout = dbc.Container([
         html.Hr(),
     ])),
 
-    dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0),
     dbc.Row(dbc.Col(html.Div(id="vps-table"))),
 
 ], fluid=True, className="py-3")
 
-
-@callback(
-    Output("vps-table", "children"),
-    Output("vps-last-updated", "children"),
-    Input("vps-interval", "n_intervals"),
-)
-def update_stats(_):
-    df = get_docker_stats()
-
-    if df.empty:
-        table = html.P("No containers found or Docker not accessible.", className="text-warning")
-    else:
-        table = dbc.Table.from_dataframe(df, bordered=True, hover=True, responsive=True, size="sm", striped=True, className="table-dark")
-
-    updated = f"Last updated: {datetime.now().strftime('%H:%M:%S')}"
-    return table, updated
