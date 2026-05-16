@@ -1,4 +1,4 @@
-# 2026.05.16  11.00
+# 2026.05.16  12.00
 import dash
 from dash import dcc, html, callback, Output, Input
 import dash_bootstrap_components as dbc
@@ -83,7 +83,7 @@ layout = dbc.Container([
                 html.H5("VPS Docker Stats", className="text-info"),
                 html.Div(id="docker-table"),
             ]), style=CARD_STYLE), width=12)
-    ], className="g-3 mb-3"),
+    ], className="g-4 mb-4"),
 
     dbc.Row([
     dbc.Col(
@@ -103,7 +103,7 @@ layout = dbc.Container([
                 html.Div(id="packages-table"),
             ]), style=CARD_STYLE), width=6),
 
-    ], className="g-3 mb-3")
+    ], className="g-4 mb-4")
 
 ], fluid=True)
 
