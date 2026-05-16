@@ -1,4 +1,4 @@
-# 2026.05.11  18.00
+# 2026.05.16  18.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -66,8 +66,8 @@ layout = dbc.Container([
                 html.Div(id="crm-rag-answer", style={"maxHeight": "200px", "overflowY": "auto"}), style=CARD_STYLE ),  md=4),
     ], className="g-3 mb-3"),
 
-    dbc.Row(id="crm-rag-mini-charts", className="g-3 mb-4"),
-    dbc.Row(id="crm-rag-mini-tables", className="g-3 mb-4"),
+    dbc.Row(id="crm-rag-mini-charts", className="g-3 mb-3"),
+    dbc.Row(id="crm-rag-mini-tables", className="g-3 mb-3"),
 
     html.Div([
         html.H5("CRM Logs", className="mb-2", style={"color": "#f59e0b", "fontWeight": "500"}),
