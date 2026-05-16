@@ -70,8 +70,7 @@ layout = dbc.Container([
 
     html.Div([
         html.H1("System Control Center", className="text-light fw-bold"),
-        html.P("Monitoring VPS Dockers System Packages", className="text-muted"),
-        html.Small(id="vps-updated", className="text-muted"),
+        html.P(["Monitoring VPS Dockers/System/Packages — ", html.Small(id="vps-updated", className="text-muted")], className="text-muted"),
     ], className="mb-5"),
 
     dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
