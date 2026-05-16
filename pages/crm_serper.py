@@ -1,4 +1,4 @@
-# 2026.05.12  16.00
+# 2026.05.16  18.00
 import dash
 import pandas as pd
 from dash import html, dcc, Input, Output, State, callback
@@ -33,10 +33,10 @@ layout = dbc.Container([
     dcc.Store(id=f"{DASH_ID_TAG}-df-store"),
 
     # ---- 6 MINI CHART GRID ----
-    dbc.Row(id=f"{DASH_ID_TAG}-mini-charts", className="g-3 mb-4"),
+    dbc.Row(id=f"{DASH_ID_TAG}-mini-charts", className="g-3 mb-3"),
 
     # ---- 3 SMALL KPI TABLE ----
-    dbc.Row(id=f"{DASH_ID_TAG}-mini-tables", className="g-3 mb-4"),
+    dbc.Row(id=f"{DASH_ID_TAG}-mini-tables", className="g-3 mb-3"),
 
     # ---- LOG TABLE ----
     html.Div([
