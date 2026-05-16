@@ -8,6 +8,14 @@ import docker
 
 dash.register_page(__name__, path="/", icon="fa-solid fa-server", name="Home", order=0)
 
+# ---- Glass Card ----
+CARD_STYLE = {
+    "background": "rgba(255, 255, 255, 0.03)",
+    "backdrop-filter": "blur(10px)",
+    "border-radius": "15px", "border": "1px solid rgba(255, 255, 255, 0.1)",
+    "padding": "15px", "width": "100%"
+}
+
 
 layout = dbc.Container([
 
