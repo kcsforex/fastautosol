@@ -1,6 +1,6 @@
 # 2026.05.16  8.00
 import dash
-from dash import html, callback, Output, Input
+from dash import dcc, html, callback, Output, Input
 import dash_bootstrap_components as dbc
 import pandas as pd
 import sys
@@ -72,7 +72,7 @@ layout = dbc.Container([
         html.P("Monitoring VPS Dockers System Packages", className="text-muted"),
     ], className="mb-5"),
 
-    dbc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
+    dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
 
     dbc.Row([
         dbc.Col(dbc.Card(
