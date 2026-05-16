@@ -31,7 +31,7 @@ def fetch_one_docker(c) -> dict:
     cpu_pct      = round((cpu_delta / system_delta) * cpus * 100, 2) if system_delta > 0 else 0.0
     mem_usage = s["memory_stats"].get("usage", 0)  / 1024 / 1024  
     mem_limit = s["memory_stats"].get("limit", 0) / 1024 / 1024 / 1024 
-    mem_pct   = round(mem_bytes / s["memory_stats"].get("limit", 1) * 100, 1)
+    mem_pct   = round(s["memory_stats"].get("usage", 1) / s["memory_stats"].get("limit", 1) * 100, 1)
     
     return {"ID":c.short_id, "Name":c.name[:30], "CPU %":f"{cpu_pct}%",
             "MEM Usage":f"{mem_usage:.1f} MiB", "MEM Limit": f"{mem_limit:.1f} GB", "MEM %":f"{mem_pct}%", "Status": c.status}
@@ -75,7 +75,7 @@ layout = dbc.Container([
         html.P(["Monitoring VPS Dockers/System/Packages → ", html.Small(id="vps-updated", className="text-muted")], className="text-muted"),
     ], className="mb-5"),
 
-    dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
+    dcc.Interval(id="vps-interval", interval=30*1000, n_intervals=0), 
 
     dbc.Row([
         dbc.Col(dbc.Card(
