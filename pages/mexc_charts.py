@@ -1,4 +1,4 @@
-# 2026.05.11  18.00
+# 2026.05.16  18.00
 import pandas as pd
 from datetime import datetime
 from fastapi import APIRouter
@@ -26,19 +26,12 @@ CARD_STYLE = {
 
 layout = dbc.Container([
     html.Div([ 
-        html.H2("MEXC xStocks", className="text-light fw-bold mb-0")
-            ], className="mb-4"),
-    
+        html.H2("MEXC xStocks", className="text-light fw-bold mb-0")], className="mb-4"),
             dcc.Interval(id='refresh', interval=60*1000), 
-
             dcc.Dropdown(id="chart-count", options=[{"label": str(i), "value": i} for i in [8,12,16,20,24,28,32]],
                 value=12, clearable=False, searchable=False, style={"width": "120px"}),
-
-             html.Br(),
-            
-            dbc.Row(id='xstocks-charts', className="g-3 mb-3"),
-       
-
+            html.Br(),   
+            dbc.Row(id='xstocks-charts', className="g-3 mb-3"),    
 ], fluid=True)
 
 @callback(
@@ -56,9 +49,7 @@ def update_dashboard(n_intervals, n_charts):
         return html.Div("No data found", className="text-light fst-italic")
 
     df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True).dt.tz_convert("Europe/Budapest")
-
     XSTOCKS = df.sort_values("volume24h", ascending=False)["symbol"].unique()
-        
     xstocks_charts = []
     for symbol in XSTOCKS[:n_charts]:
         chart_df = df[df["symbol"] == symbol].sort_values("timestamp")
