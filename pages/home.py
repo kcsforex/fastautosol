@@ -3,7 +3,7 @@ from dash import html, dcc, callback, Output, Input
 from datetime import datetime
 import dash_bootstrap_components as dbc
 
-dash.register_page(__name__, path="/", icon="fa-solid fa-server", name="Home", order=0)
+dash.register_page(__name__, path="/", icon="fa-solid fa-home", name="Home", order=0)
 
 CARD_STYLE = {
     "background": "rgba(255, 255, 255, 0.03)",
