@@ -1,7 +1,8 @@
-# 2026.05.16  8.00
+# 2026.05.16  9.00
 import dash
 from dash import dcc, html, callback, Output, Input
 import dash_bootstrap_components as dbc
+from datetime import datetime
 import pandas as pd
 import sys
 import platform
@@ -114,7 +115,7 @@ layout = dbc.Container([
     Input("vps-interval", "n_intervals"),
     Input("refresh-btn", "n_clicks"),
 )
-def render_tables(_):
+def render_tables(_, n_clicks):
     
     docker_stats_df = get_docker_stats()
     runtime_info, pkg_rows = get_runtime_info()
