@@ -70,7 +70,7 @@ layout = dbc.Container([
 
     html.Div([
         html.H1("System Control Center", className="text-light fw-bold"),
-        html.P(["Monitoring VPS Dockers/System/Packages — ", html.Small(id="vps-updated", className="text-muted")], className="text-muted"),
+        html.P(["Monitoring VPS Dockers/System/Packages → ", html.Small(id="vps-updated", className="text-muted")], className="text-muted"),
     ], className="mb-5"),
 
     dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
@@ -119,7 +119,7 @@ def render_tables(_, n_clicks):
     docker_stats_df = get_docker_stats()
     runtime_info, pkg_rows = get_runtime_info()
     host_metrics = get_host_metrics()
-    vps_upd = f"Last updated: {datetime.now().strftime('%H:%M:%S')}"
+    vps_upd = f"Updated: {datetime.now().strftime('%H:%M:%S')}"
     
     if docker_stats_df.empty:
         docker_tbl = html.P("No containers found or Docker not accessible.", className="text-warning")
