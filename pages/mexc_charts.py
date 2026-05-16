@@ -58,14 +58,9 @@ def update_dashboard(n_intervals, n_charts):
 
         fig = px.line(chart_df, x="timestamp", y="price", template="plotly_dark")
         fig.update_traces(line_color='#00d1ff', line_width=2)
-        fig.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)', 
-            plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=0, r=0, t=0, b=0),
-            height=150,
+        fig.update_layout(paper_bgcolor='rgba(0,0,0,0)',  plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=0, r=0, t=0, b=0), height=150,
             xaxis=dict(showgrid=False, title="", showticklabels=True, tickformat="%H:%M"), 
-            yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', title="", side="right")
-        )
+            yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', title="", side="right"))
         
         xstocks_charts.append(
             dbc.Col([
@@ -76,6 +71,5 @@ def update_dashboard(n_intervals, n_charts):
             ], width=3, className="mb-1")
         )
   
-
     return  xstocks_charts 
 
