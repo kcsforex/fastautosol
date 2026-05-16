@@ -71,6 +71,7 @@ layout = dbc.Container([
     html.Div([
         html.H1("System Control Center", className="text-light fw-bold"),
         html.P("Monitoring VPS Dockers System Packages", className="text-muted"),
+        html.Small(id="vps-updated", className="text-muted"),
     ], className="mb-5"),
 
     dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
@@ -79,7 +80,6 @@ layout = dbc.Container([
         dbc.Col(dbc.Card(
             dbc.CardBody([
                 html.H5("VPS Docker Stats", className="text-info"),
-                html.Small(id="docker-updated", className="text-muted"),
                 html.Div(id="docker-table"),
             ]), style=CARD_STYLE), width=12)
     ], className="mb-5"),
@@ -108,7 +108,7 @@ layout = dbc.Container([
 
 
 @callback(
-    Output("docker-updated", "children"),
+    Output("vps-updated", "children"),
     Output("docker-table", "children"),
     Output("env-table", "children"),
     Output("packages-table", "children"),
@@ -120,8 +120,8 @@ def render_tables(_, n_clicks):
     docker_stats_df = get_docker_stats()
     runtime_info, pkg_rows = get_runtime_info()
     host_metrics = get_host_metrics()
-
-    docker_stats_upd = f"Last updated: {datetime.now().strftime('%H:%M:%S')}"
+    vps_upd = f"Last updated: {datetime.now().strftime('%H:%M:%S')}"
+    
     if docker_stats_df.empty:
         docker_tbl = html.P("No containers found or Docker not accessible.", className="text-warning")
     else:
@@ -136,4 +136,4 @@ def render_tables(_, n_clicks):
     pkg_tbl = dbc.Table.from_dataframe(pkg_df, striped=False, hover=True, responsive=True, borderless=True, 
         className="text-light table-sm m-0", style=TABLE_STYLE)
 
-    return docker_stats_upd, docker_tbl, env_tbl, pkg_tbl
+    return vps_upd, docker_tbl, env_tbl, pkg_tbl
