@@ -12,8 +12,8 @@ dash.register_page(__name__, path="/", icon="fa-solid fa-server", name="Home", o
 layout = dbc.Container([
 
     dbc.Row(dbc.Col([
-        html.H3([html.I(className="fa-solid fa-server me-2 text-primary"), "VPS Docker Stats"]),
-        html.Small(id="vps-last-updated", className="text-muted"),
+        html.H3("VPS Docker Stats"),
+        html.Small(id="home-updated", className="text-muted"),
         html.Hr(),
     ])),
 
