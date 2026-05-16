@@ -1,4 +1,4 @@
-# 2026.05.15  18.00
+# 2026.05.16  8.00
 import dash
 from dash import html, callback, Output, Input
 import dash_bootstrap_components as dbc
@@ -9,6 +9,7 @@ import os
 import shutil
 import psutil
 from importlib.metadata import version, PackageNotFoundError
+import docker
 
 dash.register_page( __name__, name="VPS SysInfo", icon="fa-solid fa-server", order=8)
 
@@ -16,8 +17,31 @@ CARD_STYLE = {
     "background": "rgba(255, 255, 255, 0.03)", "backdropFilter": "blur(10px)",
     "borderRadius": "15px", "border": "1px solid rgba(255, 255, 255, 0.1)", "padding": "20px"}
 
-TABLE_STYLE = { "backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white",}
+TABLE_STYLE = { "backgroundColor": "transparent", "--bs-table-bg": "transparent", "--bs-table-accent-bg": "transparent", "color": "white"}
 PACKAGES = ["fastapi", "fastmcp", "pandas", "dash", "dash-bootstrap-components", "ccxt", "scikit-learn", "SQLAlchemy", "dlt", "psycopg"]
+ALLOWED_PREFIXES = ("xstock", "crypto", "n8n", "python-dash", "mcp-postgres", "crawl4ai", "postgresql") 
+
+def fetch_one_docker(c) -> dict:
+    s = c.stats(stream=False)
+    cpu_delta    = s["cpu_stats"]["cpu_usage"]["total_usage"] - s["precpu_stats"]["cpu_usage"]["total_usage"]
+    system_delta = s["cpu_stats"]["system_cpu_usage"]         - s["precpu_stats"]["system_cpu_usage"]
+    cpus         = s["cpu_stats"].get("online_cpus", 1)
+    cpu_pct      = round((cpu_delta / system_delta) * cpus * 100, 2) if system_delta > 0 else 0.0
+    mem_bytes = s["memory_stats"].get("usage", 0)
+    mem_mib   = mem_bytes / 1024 / 1024
+    mem_pct   = round(mem_bytes / s["memory_stats"].get("limit", 1) * 100, 1)
+    return {"ID":c.short_id, "Name":c.name[:30], "CPU %":f"{cpu_pct}%", "MEM Usage":f"{mem_mib:.1f} MiB", "MEM %":f"{mem_pct}%", "Status": c.status}
+
+def get_docker_stats() -> pd.DataFrame:
+    try:
+        client = docker.from_env()  
+        containers = [c for c in client.containers.list() if c.name.startswith(ALLOWED_PREFIXES)] 
+        with ThreadPoolExecutor(max_workers=len(containers) or 1) as ex:
+            rows = list(ex.map(fetch_one_docker, containers))
+        return pd.DataFrame(rows)
+    except Exception as e:
+        print(e)
+        return pd.DataFrame()
 
 def get_runtime_info():
     info_header = [("Python Version", sys.version.split()[0]), ("OS Platform", platform.platform()[:11])]
@@ -35,45 +59,27 @@ def get_host_metrics():
     cpu_freq = psutil.cpu_freq()
     mem = psutil.virtual_memory()
     disk = shutil.disk_usage("/")
-
     return [ ("CPU Usage", f"{cpu} %"), ("CPU Cores", psutil.cpu_count(logical=True)), ("CPU Frequency", f"{cpu_freq.current:.0f} MHz"),
         ("Memory Usage", f"{mem.percent} %"), ("Memory Total", f"{mem.total / (1024**3):.1f} GB"),
         ("Disk Usage", f"{disk.used / disk.total * 100:.1f} %"), ("Disk Total", f"{disk.total / (1024**3):.1f} GB")]
 
+
 layout = dbc.Container([
 
-    # Header
     html.Div([
         html.H1("System Control Center", className="text-light fw-bold"),
-        html.P("Monitoring 4 Data Grabbers & 1 ML Engine", className="text-muted"),
+        html.P("Monitoring VPS Dockers System Packages", className="text-muted"),
     ], className="mb-5"),
 
-    # ----- Status cards -----
+    dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
+
     dbc.Row([
         dbc.Col(dbc.Card(
             dbc.CardBody([
-                html.H5("Crypto Engine", className="text-info"),
-                html.P("Status: Active", className="small"),
-                html.Div("BTC: $96,432", className="h4"),
-                dbc.Button("Crypto", href="/bybit", size="sm", color="info", outline=True)
-            ]), style={"background": "rgba(255,255,255,0.05)"}), width=4),
-
-        dbc.Col(dbc.Card(
-            dbc.CardBody([
-                html.H5("Lufthansa API", className="text-warning"),
-                html.P("Status: Syncing", className="small"),
-                html.Div("Last: 2m ago", className="h4"),
-                dbc.Button("Lufthansa", href="/lufthansa", size="sm", color="warning", outline=True) 
-            ]), style={"background": "rgba(255,255,255,0.05)"}), width=4),
-
-        dbc.Col(dbc.Card(
-            dbc.CardBody([
-                html.H5("ML Engine", className="text-success"),
-                html.P("Backend: Databricks", className="small"),
-                html.Div("98% Acc", className="h4"),
-                dbc.Button("DatabrickML", href="/databricks", size="sm", color="success", outline=True)
-            ]), style={"background": "rgba(255,255,255,0.05)"}), width=4)
-        
+                html.H5("VPS Docker Stats", className="text-info"),
+                html.Small(id="vps-last-updated", className="text-muted"),
+                html.Div(id="vps-table"),
+            ]), style={"background": "rgba(255,255,255,0.05)"}), width=12)
     ], className="mb-5"),
 
     dbc.Row([
@@ -100,23 +106,30 @@ layout = dbc.Container([
 
 
 @callback(
+    Output("vps-table", "children"),
+    Output("vps-last-updated", "children"),
     Output("env-table", "children"),
     Output("packages-table", "children"),
+    Input("vps-interval", "n_intervals"),
     Input("refresh-btn", "n_clicks"),
 )
 def render_tables(_):
     
+    docker_stats_df = get_docker_stats()
     runtime_info, pkg_rows = get_runtime_info()
     host_metrics = get_host_metrics()
 
+    if docker_stats_df.empty:
+        docker_tbl = html.P("No containers found or Docker not accessible.", className="text-warning")
+    else:
+        docker_tbl = dbc.Table.from_dataframe(docker_stats_df, bordered=True, hover=True, responsive=True, size="sm", striped=True, className="table-dark")
+ 
     env_df = pd.DataFrame(runtime_info + host_metrics, columns=["Metric", "Value"])
-
     env_tbl = dbc.Table.from_dataframe(env_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light table-sm m-0",
         style=TABLE_STYLE)
 
     pkg_df = pd.DataFrame(pkg_rows, columns=["Package", "Version"])
-
     pkg_tbl = dbc.Table.from_dataframe(pkg_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light table-sm m-0", #font-monospace"
         style=TABLE_STYLE)
 
-    return env_tbl, pkg_tbl
+    return docker_tbl, env_tbl, pkg_tbl
