@@ -1,4 +1,4 @@
-# 2026.05.16  9.00
+# 2026.05.16  10.00
 import dash
 from dash import dcc, html, callback, Output, Input
 import dash_bootstrap_components as dbc
@@ -29,10 +29,12 @@ def fetch_one_docker(c) -> dict:
     system_delta = s["cpu_stats"]["system_cpu_usage"]         - s["precpu_stats"]["system_cpu_usage"]
     cpus         = s["cpu_stats"].get("online_cpus", 1)
     cpu_pct      = round((cpu_delta / system_delta) * cpus * 100, 2) if system_delta > 0 else 0.0
-    mem_bytes = s["memory_stats"].get("usage", 0)
-    mem_mib   = mem_bytes / 1024 / 1024
+    mem_usage = s["memory_stats"].get("usage", 0)  / 1024 / 1024  
+    mem_limit = s["memory_stats"].get("limit", 0) / 1024 / 1024 / 1024 
     mem_pct   = round(mem_bytes / s["memory_stats"].get("limit", 1) * 100, 1)
-    return {"ID":c.short_id, "Name":c.name[:30], "CPU %":f"{cpu_pct}%", "MEM Usage":f"{mem_mib:.1f} MiB", "MEM %":f"{mem_pct}%", "Status": c.status}
+    
+    return {"ID":c.short_id, "Name":c.name[:30], "CPU %":f"{cpu_pct}%",
+            "MEM Usage":f"{mem_usage:.1f} MiB", "MEM Limit": f"{mem_limit:.1f} GB", "MEM %":f"{mem_pct}%", "Status": c.status}
 
 def get_docker_stats() -> pd.DataFrame:
     try:
