@@ -33,8 +33,8 @@ def fetch_one_docker(c) -> dict:
     mem_limit = s["memory_stats"].get("limit", 0) / 1024 / 1024 / 1024 
     mem_pct   = round(s["memory_stats"].get("usage", 1) / s["memory_stats"].get("limit", 1) * 100, 1)
     
-    return {"ID":c.short_id, "Name":c.name[:30], "CPU %":f"{cpu_pct}%",
-            "MEM Usage":f"{mem_usage:.1f} MiB", "MEM Limit": f"{mem_limit:.1f} GB", "MEM %":f"{mem_pct}%", "Status": c.status}
+    return {"ID":c.short_id, "Name": c.name.split("-dwlrq6pw")[0], # c.name[:30],
+            "CPU %":f"{cpu_pct}%", "MEM Usage":f"{mem_usage:.1f} MiB", "MEM Limit": f"{mem_limit:.1f} GB", "MEM %":f"{mem_pct}%", "Status": c.status}
 
 def get_docker_stats() -> pd.DataFrame:
     try:
@@ -83,7 +83,7 @@ layout = dbc.Container([
                 html.H5("VPS Docker Stats", className="text-info"),
                 html.Div(id="docker-table"),
             ]), style=CARD_STYLE), width=12)
-    ], className="mb-4"),
+    ], className="g-3 mb-3"),
 
     dbc.Row([
     dbc.Col(
@@ -103,7 +103,7 @@ layout = dbc.Container([
                 html.Div(id="packages-table"),
             ]), style=CARD_STYLE), width=6),
 
-    ], className="mb-4")
+    ], className="g-3 mb-3")
 
 ], fluid=True)
 
