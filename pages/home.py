@@ -1,31 +1,62 @@
 import dash
 from dash import html, dcc, callback, Output, Input
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
 import dash_bootstrap_components as dbc
-import pandas as pd
-import docker
 
 dash.register_page(__name__, path="/", icon="fa-solid fa-server", name="Home", order=0)
 
-# ---- Glass Card ----
 CARD_STYLE = {
     "background": "rgba(255, 255, 255, 0.03)",
-    "backdrop-filter": "blur(10px)",
-    "border-radius": "15px", "border": "1px solid rgba(255, 255, 255, 0.1)",
-    "padding": "15px", "width": "100%"
+    "backdropFilter": "blur(10px)",
+    "borderRadius": "15px",
+    "border": "1px solid rgba(255, 255, 255, 0.1)",
+    "padding": "15px",
+    "width": "100%",
+    "height": "100%",
 }
+
+CARDS = [
+    {"icon": "fa-solid fa-chart-line",  "title": "Analytics",     "img": "https://placehold.co/400x160/1a1a2e/7eb3ff?text=Analytics",    "desc": "Track key metrics and trends across your trading systems in real time."},
+    {"icon": "fa-solid fa-robot",       "title": "Bots",          "img": "https://placehold.co/400x160/1a1a2e/7eb3ff?text=Bots",          "desc": "Manage and monitor your automated trading bots and their performance."},
+    {"icon": "fa-solid fa-database",    "title": "Database",      "img": "https://placehold.co/400x160/1a1a2e/7eb3ff?text=Database",      "desc": "Inspect PostgreSQL tables, run queries and review stored data."},
+    {"icon": "fa-solid fa-webhook",     "title": "Webhooks",      "img": "https://placehold.co/400x160/1a1a2e/7eb3ff?text=Webhooks",      "desc": "Incoming signal endpoints, logs and webhook health status."},
+    {"icon": "fa-solid fa-server",      "title": "VPS SysInfo",   "img": "https://placehold.co/400x160/1a1a2e/7eb3ff?text=SysInfo",       "desc": "Live CPU, memory and disk stats for the VPS host and containers."},
+    {"icon": "fa-solid fa-gear",        "title": "Settings",      "img": "https://placehold.co/400x160/1a1a2e/7eb3ff?text=Settings",      "desc": "Configure API keys, notifications and application preferences."},
+]
+
+
+def make_card(c):
+    return dbc.Card([
+        dbc.CardHeader([
+            html.I(className=f"{c['icon']} me-2 text-info"),
+            html.Span(c["title"], className="fw-semibold text-light"),
+        ], style={"background": "rgba(255,255,255,0.05)", "border": "none"}),
+        html.Img(src=c["img"], style={"width": "100%", "height": "160px", "objectFit": "cover"}),
+        dbc.CardBody(
+            html.P(c["desc"], className="text-muted small m-0"),
+        ),
+    ], style=CARD_STYLE)
 
 
 layout = dbc.Container([
 
-    dbc.Row(dbc.Col([
-        html.H3("VPS Docker Stats"),
-        html.Small(id="home-updated", className="text-muted"),
-        html.Hr(),
-    ])),
+    # ── Top-centre logo ───
+    dbc.Row(
+        dbc.Col(
+            html.Img(
+                src="/assets/logo.png",          # ← drop your logo into /assets/logo.png
+                style={"maxHeight": "90px", "objectFit": "contain"},
+            ),
+            width="auto",
+        ),
+        justify="center",
+        className="mb-4 mt-3",
+    ),
 
-    dbc.Row(dbc.Col(html.Div(id="vps-table"))),
+    # ── 2 × 3 info cards ───
+    dbc.Row([
+        dbc.Col(make_card(CARDS[i]), width=6, className="mb-4")
+        for i in range(6)
+    ]),
 
 ], fluid=True, className="py-3")
-
