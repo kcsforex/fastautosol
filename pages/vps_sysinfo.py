@@ -9,6 +9,7 @@ import os
 import shutil
 import psutil
 from importlib.metadata import version, PackageNotFoundError
+from concurrent.futures import ThreadPoolExecutor
 import docker
 
 dash.register_page( __name__, name="VPS SysInfo", icon="fa-solid fa-server", order=8)
@@ -77,8 +78,8 @@ layout = dbc.Container([
         dbc.Col(dbc.Card(
             dbc.CardBody([
                 html.H5("VPS Docker Stats", className="text-info"),
-                html.Small(id="vps-last-updated", className="text-muted"),
-                html.Div(id="vps-table"),
+                html.Small(id="docker-updated", className="text-muted"),
+                html.Div(id="docker-table"),
             ]), style={"background": "rgba(255,255,255,0.05)"}), width=12)
     ], className="mb-5"),
 
@@ -106,8 +107,8 @@ layout = dbc.Container([
 
 
 @callback(
-    Output("vps-table", "children"),
-    Output("vps-last-updated", "children"),
+    Output("docker-updated", "children"),
+    Output("docker-table", "children"),
     Output("env-table", "children"),
     Output("packages-table", "children"),
     Input("vps-interval", "n_intervals"),
@@ -119,6 +120,7 @@ def render_tables(_):
     runtime_info, pkg_rows = get_runtime_info()
     host_metrics = get_host_metrics()
 
+    docker_stats_upd = f"Last updated: {datetime.now().strftime('%H:%M:%S')}"
     if docker_stats_df.empty:
         docker_tbl = html.P("No containers found or Docker not accessible.", className="text-warning")
     else:
@@ -132,4 +134,4 @@ def render_tables(_):
     pkg_tbl = dbc.Table.from_dataframe(pkg_df, striped=False, hover=True, responsive=True, borderless=True, className="text-light table-sm m-0", #font-monospace"
         style=TABLE_STYLE)
 
-    return docker_tbl, env_tbl, pkg_tbl
+    return docker_stats_upd, docker_tbl, env_tbl, pkg_tbl
