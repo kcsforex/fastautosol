@@ -72,7 +72,7 @@ layout = dbc.Container([
         html.P("Monitoring VPS Dockers System Packages", className="text-muted"),
     ], className="mb-5"),
 
-    dcc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
+    dbc.Interval(id="vps-interval", interval=60*1000, n_intervals=0), 
 
     dbc.Row([
         dbc.Col(dbc.Card(
