@@ -49,11 +49,11 @@ layout = dbc.Container([
 
     # MINI CHARTS
     dbc.Row(id=f"{DASH_ID_TAG}-mini-charts",
-        className="g-3 mb-4"),
+        className="g-3 mb-3"),
 
     # MINI TABLES
     dbc.Row(id=f"{DASH_ID_TAG}-mini-tables",
-        className="g-3 mb-4"),
+        className="g-3 mb-3"),
 
     # COMMENT LOG
     html.Div([
